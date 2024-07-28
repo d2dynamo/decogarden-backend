@@ -7,10 +7,12 @@ declare namespace NodeJS {
     HTTPS_PORT?: string;
     HTTPS_KEY_FILE?: string;
     HTTPS_CERT_FILE?: string;
+    JWT_PRIVATE_KEY_PATH?: string;
+    JWT_PUBLIC_KEY_PATH?: string;
     // -- MongoDB --
     MONGO_URL?: string;
     MONGO_DB_NAME?: string;
-    MONGO_CERT_PATH?: string;
-    MONGO_KEY_PATH?: string;
+    MONGO_CA?: string;
+    MONGO_CERT?: string;
   }
 }

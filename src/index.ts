@@ -7,11 +7,20 @@ import "dotenv/config";
 import { createServer as https } from "https";
 import { createServer as http } from "http";
 import { readFileSync } from "fs";
+import rateLimit from "express-rate-limit";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import passport from "./modules/passport";
 
 import { send } from "./modules/send";
 import { getGracey } from "./modules/gracey";
-import rateLimit from "express-rate-limit";
-import bodyParser from "body-parser";
+import createUser from "./modules/users/create";
+import { stringToObjectId } from "./modules/database/mongo";
+import { generateToken, validateToken } from "./modules/token";
+
+//  ROUTERS
+import auth from "./routes/auth";
+import cors from "./middlewares/cors";
 
 const gracey = getGracey();
 
@@ -38,6 +47,14 @@ async function interruptSignalHandler(signal: string) {
 if (process.env.NODE_ENV === "development") {
   (async () => {
     try {
+      const at = await generateToken({
+        userId: "66a121cec326bfbd55a4c03f",
+        email: "info@dekosodas.lt",
+        expiration: "2h",
+        type: "access_token",
+      });
+      console.log(`AccessToken: ${at}`);
+      return;
     } catch (err) {
       console.error(err);
     }
@@ -81,27 +98,12 @@ const app: Application = express();
 app.set("etag", true);
 app.set("x-powered-by", false);
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Max-Age", "86400");
-    return res.sendStatus(204);
-  }
-
-  res.setHeader("Content-Type", "application/json");
-
-  next();
-});
+app.use(cors);
+app.use(cookieParser());
 app.use(rateLimitExpress);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(passport.initialize());
 
 app.use((req, res, next) => {
   if (ServerShuttingDown) {
@@ -112,8 +114,13 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  console.log("req received", req);
+  console.log("req received", req.headers, req.body);
+  next();
 });
+
+app.use("/auth", [auth, send]);
+
+// SERVER INIT
 
 const portHttp = Number(process.env.HTTP_PORT) || 3000;
 const portHttps = Number(process.env.HTTPS_PORT) || 4443;
