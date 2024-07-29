@@ -10,17 +10,18 @@ import { readFileSync } from "fs";
 import rateLimit from "express-rate-limit";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import passport from "./modules/passport";
+import session from "express-session";
 
+import cors from "./middlewares/cors";
+import passport from "./modules/passport";
 import { send } from "./modules/send";
 import { getGracey } from "./modules/gracey";
-import createUser from "./modules/users/create";
-import { stringToObjectId } from "./modules/database/mongo";
 import { generateToken, validateToken } from "./modules/token";
 
 //  ROUTERS
 import auth from "./routes/auth";
-import cors from "./middlewares/cors";
+import hello from "./routes/hello";
+import type { UserError } from "./util/error";
 
 const gracey = getGracey();
 
@@ -53,12 +54,23 @@ if (process.env.NODE_ENV === "development") {
         expiration: "2h",
         type: "access_token",
       });
+
       console.log(`AccessToken: ${at}`);
       return;
     } catch (err) {
       console.error(err);
     }
   })();
+}
+
+if (!process.env.HTTPS_CERT_FILE || !process.env.HTTPS_KEY_FILE) {
+  console.log("Missing https cert path");
+  process.exit(0);
+}
+
+if (!process.env.SESSION_SECRET) {
+  console.log("Missing session secret");
+  process.exit(0);
 }
 
 process.on("SIGINT", () => {
@@ -86,16 +98,10 @@ process.on("SIGTERM", () => {
 const rateLimitExpress = rateLimit({
   windowMs: 1000 * 60 * 1,
   limit: 150,
-  keyGenerator: (req: Request) => {
-    const ip = req.headers["x-forwarded-for"] || req.ip?.toString() || "";
-
-    return String(ip);
-  },
 });
 
 const app: Application = express();
 
-app.set("etag", true);
 app.set("x-powered-by", false);
 
 app.use(cors);
@@ -104,6 +110,14 @@ app.use(rateLimitExpress);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true },
+  })
+);
 
 app.use((req, res, next) => {
   if (ServerShuttingDown) {
@@ -113,22 +127,42 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/auth", [auth, send]);
+
 app.use((req, res, next) => {
-  console.log("req received", req.headers, req.body);
-  next();
+  passport.authenticate("bearer", (err, _, info) => {
+    if (err) {
+      res.locals = {
+        error: true,
+        code: err.code || 500,
+        message: err.message,
+        payload: {},
+      };
+      send(req, res);
+      return;
+    }
+    if (info) {
+      res.locals = {
+        error: true,
+        code: 401,
+        message: "unauthorized",
+        payload: {},
+      };
+      send(req, res);
+      return;
+    }
+    next();
+  })(req, res, next);
 });
 
-app.use("/auth", [auth, send]);
+// ROUTES
+
+app.use("/hello", [hello, send]);
 
 // SERVER INIT
 
 const portHttp = Number(process.env.HTTP_PORT) || 3000;
 const portHttps = Number(process.env.HTTPS_PORT) || 4443;
-
-if (!process.env.HTTPS_CERT_FILE || !process.env.HTTPS_KEY_FILE) {
-  console.log("Missing https certs");
-  process.exit(0);
-}
 
 const key = readFileSync(process.env.HTTPS_KEY_FILE);
 const cert = readFileSync(process.env.HTTPS_CERT_FILE);

@@ -9,6 +9,7 @@ declare namespace NodeJS {
     HTTPS_CERT_FILE?: string;
     JWT_PRIVATE_KEY_PATH?: string;
     JWT_PUBLIC_KEY_PATH?: string;
+    SESSION_SECRET?: string;
     // -- MongoDB --
     MONGO_URL?: string;
     MONGO_DB_NAME?: string;

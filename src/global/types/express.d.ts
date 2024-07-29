@@ -1,13 +1,8 @@
-import "express";
 import type { ITokenUser } from "../interfaces/token";
+import { Request } from "express";
 
-declare namespace Express {
-  export interface Request {
-    user: ITokenUser;
-  }
-  export interface Response {
-    locals: {
-      error: boolean;
-    };
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: ITokenUser;
   }
 }

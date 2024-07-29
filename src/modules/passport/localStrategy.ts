@@ -1,12 +1,10 @@
-import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import connectCollection from "../database/mongo";
 
 const localStrategy = new LocalStrategy(
-  { usernameField: "email", session: false },
+  { usernameField: "email" },
   async (email, password, done) => {
     try {
-      console.log("passport auth request received", email, password);
       const coll = await connectCollection("users");
 
       const userDoc = await coll.findOneAndUpdate(
@@ -24,8 +22,6 @@ const localStrategy = new LocalStrategy(
         }
       );
 
-      console.log("userDoc", userDoc);
-
       if (!userDoc) {
         return done(null, false, {
           message: "user not found",
@@ -39,7 +35,6 @@ const localStrategy = new LocalStrategy(
       }
 
       if (!(await Bun.password.verify(password, userDoc.hash, "argon2id"))) {
-        console.log("invalid pass");
         return done(null, false, {
           message: "incorrect password",
         });
@@ -50,12 +45,10 @@ const localStrategy = new LocalStrategy(
         { $set: { lastLogin: new Date() } }
       );
 
-      console.log("user logged in");
-
       return done(null, { id: userDoc._id, email: email });
     } catch (err) {
       console.log(err);
-      return done(err);
+      return done({ code: 500, message: "internal server error" });
     }
   }
 );

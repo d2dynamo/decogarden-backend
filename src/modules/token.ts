@@ -115,8 +115,6 @@ export async function validateToken(
     };
   } catch (err) {
     if (err instanceof jose.errors.JOSEError) {
-      throw err;
-    } else {
       return {
         verified: false,
         isExpired: err instanceof jose.errors.JWTExpired,
@@ -127,6 +125,8 @@ export async function validateToken(
           err instanceof jose.errors.JWTClaimValidationFailed,
         jwt: null,
       };
+    } else {
+      throw err;
     }
   }
 }
