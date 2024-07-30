@@ -1,17 +1,26 @@
-import { UserError } from "../../util/error";
+import type { AddItem } from "../../global/interfaces/item";
 import connectCollection from "../database/mongo";
 
-interface AddItem {
-  title: string;
-  description: string;
-  price: number;
-  properties: { [key: string]: any };
-}
-
-export default async function addItem(item: AddItem) {
+/** Inserts new item. If failed to insert throws error.
+ *
+ * @param newItem {AddItem}
+ * @returns boolean
+ */
+export async function addItem(newItem: AddItem) {
   const coll = await connectCollection("items");
 
-  if (item.properties) {
-    const keys = 
+  const insertDoc = {
+    ...newItem,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    amountStorage: newItem.amountStorage ?? 0,
+  };
+
+  const result = await coll.insertOne(insertDoc);
+
+  if (!result.acknowledged) {
+    throw new Error("Failed to insert item");
   }
+
+  return true;
 }

@@ -1,0 +1,40 @@
+{
+  "New Controller File": {
+    "scope": "typescript",
+    "prefix": "ncf",
+    "body": [
+      "import type { Request, Response } from \"express\";",
+      "import { UserError } from \"../../util/error\";",
+      "",
+      "export default async function ${1:reqHandler}(req: Request, res: Response, next: Function) {",
+      "\ttry {",
+      "\t\t$0",
+      "\t} catch (err) {",
+      "\t\tif (err instanceof UserError) {",
+      "\t\t\tres.locals = {",
+      "\t\t\t\terror: true,",
+      "\t\t\t\tcode: err.code || 400,",
+      "\t\t\t\tmessage: err.message || \"unknown client error\"",
+      "\t\t\t};",
+      "\t\t\tnext();",
+      "\t\t\treturn;",
+      "\t\t}",
+      "",
+      "\t\tconsole.log(err);",
+      "",
+      "\t\tres.locals = {",
+      "\t\t\terror: true,",
+      "\t\t\tcode: 500,",
+      "\t\t\tmessage: \"internal server error\"",
+      "\t\t};",
+      "\t\tnext();",
+      "\t}",
+      "}"
+    ]
+  },
+  "Export Async Controller Function": {
+    "scope": "typescript",
+    "prefix": "eacf",
+    "body": []
+  }
+}

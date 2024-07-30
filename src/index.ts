@@ -17,11 +17,12 @@ import passport from "./modules/passport";
 import { send } from "./modules/send";
 import { getGracey } from "./modules/gracey";
 import { generateToken, validateToken } from "./modules/token";
+import type { UserError } from "./util/error";
 
 //  ROUTERS
 import auth from "./routes/auth";
 import hello from "./routes/hello";
-import type { UserError } from "./util/error";
+import item from "./routes/item";
 
 const gracey = getGracey();
 
@@ -158,6 +159,14 @@ app.use((req, res, next) => {
 // ROUTES
 
 app.use("/hello", [hello, send]);
+app.use("/item", [item, send]);
+
+// not found
+app.use((req, res, next) => {
+  res.status(404).json({
+    message: "endpoint not found",
+  });
+});
 
 // SERVER INIT
 

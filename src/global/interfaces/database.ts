@@ -1,12 +1,18 @@
 import type { ObjectId } from "mongodb";
 
 type PaymentMethod = "stripe" | "paysera" | "transfer";
-type OrderStatus = "awaitingPayment" | "cancelled" | "delivering" | "completed";
+type OrderStatus =
+  | "awaitingPayment"
+  | "failedPayment"
+  | "cancelled"
+  | "delivering"
+  | "completed";
 type LogType = "ERROR" | "INFO" | "WARN";
 type LogLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
+// TODO: Fix _id problem. when inserting new document we want mongodb to handle creating _id but with generics demand the _id to be defined on doc insert.
 interface DefaultDocument {
-  _id: ObjectId;
+  _id?: ObjectId; //Needs to be optional for now.
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,8 +39,8 @@ export interface User extends DefaultDocument {
 export interface Item extends DefaultDocument {
   title: string;
   description: string;
-  price: number; //float €
-  properties: { [key: string]: any };
+  price: number; //float in euro
+  properties?: { [key: string]: any };
   amountStorage: number;
 }
 
