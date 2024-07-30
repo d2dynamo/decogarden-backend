@@ -9,7 +9,25 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun start
 ```
 
-This project was created using `bun init` in bun v1.1.12. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+# TODO
+
+## Req data validation
+
+code & runtime dynamic validation.
+
+## User permissions
+
+## Redis
+
+## User email verify
+
+## Better tokens?
+
+## Logging
+
+## Orders and shipments
+
+## Payment
