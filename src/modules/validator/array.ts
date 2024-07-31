@@ -1,11 +1,11 @@
-import type { ErrorsDesc, ValidateArrayOpts } from "./index";
+import type { ErrorsDesc, ArrayValidateOpts } from "./index";
 
-export default async function arrayValidator(
+export default function arrayValidator(
   val: any,
   fieldName: string,
   errs: ErrorsDesc,
-  options: ValidateArrayOpts
-): Promise<any[] | false> {
+  options: ArrayValidateOpts
+): any[] | false {
   if (options.required && (val === undefined || val === null)) {
     errs[fieldName] = "missing required field";
     return false;

@@ -6,6 +6,7 @@ import type {
 } from "../../global/interfaces/item";
 import { listItems } from "../../modules/items/get";
 import type { ListOptions } from "../../global/interfaces/controller";
+import { dataValidator } from "../../modules/validator";
 
 type ListItemsErrors = {
   [K in keyof ListItemFilter]?: string | object;
@@ -19,84 +20,49 @@ export default async function (req: Request, res: Response, next: Function) {
 
     const errors: ListItemsErrors = {};
 
-    const filter: ListItemFilter = {
-      title: ((t) => {
-        if (typeof t === "undefined") return;
+    const filter: ListItemFilter = {};
 
-        if (typeof t !== "string" || t.length < 1 || t.length > 100) {
-          errors.title =
-            "must be a string and contain between 1 and 100 characters";
-        }
+    if (
+      await dataValidator(title, "title", "string", errors, {
+        minLength: 1,
+        maxLength: 50,
+      })
+    ) {
+      filter.title = title;
+    }
 
-        return t;
-      })(title),
+    if (await dataValidator(priceGte, "priceGte", "number", errors)) {
+      filter.priceGte = priceGte;
+    }
 
-      priceGte: ((p) => {
-        if (typeof p === "undefined") return;
+    if (await dataValidator(priceLte, "priceLte", "number", errors)) {
+      filter.priceLte = priceLte;
+    }
 
-        if (typeof p !== "number" || isNaN(p) || p < 0) {
-          errors.priceGte = "must be a number and not a negative number";
-        }
+    const opts: any = {};
 
-        return p;
-      })(priceGte),
+    if (
+      await dataValidator(page, "page", "number", errors, { min: 1, max: 1000 })
+    ) {
+      opts.page = page;
+    }
 
-      priceLte: ((p) => {
-        if (typeof p === "undefined") return;
+    if (
+      await dataValidator(pageSize, "pageSize", "number", errors, {
+        min: 1,
+        max: 1000,
+      })
+    ) {
+      opts.pageSize = pageSize;
+    }
 
-        if (typeof p !== "number" || isNaN(p) || p < 0) {
-          errors.priceGte = "must be a number and not a negative number";
-        }
+    if (await dataValidator(limit, "limit", "number", errors, { max: 1000 })) {
+      opts.limit = limit;
+    }
 
-        return p;
-      })(priceLte),
-    };
-
-    const opts: ListOptions<ListItemSorts> = {
-      page: ((p) => {
-        if (typeof p === "undefined") return;
-
-        if (typeof p !== "number" || isNaN(p) || p < 0) {
-          errors.priceGte = "must be a number and not a negative number";
-        }
-
-        return p;
-      })(page),
-
-      pageSize: ((p) => {
-        if (typeof p === "undefined") return;
-
-        if (typeof p !== "number" || isNaN(p) || p < 0) {
-          errors.priceGte = "must be a number and not a negative number";
-        }
-
-        return p;
-      })(pageSize),
-
-      limit: ((l) => {
-        if (typeof l === "undefined") return;
-
-        if (typeof l !== "number" || isNaN(l) || l < 0) {
-          errors.priceGte = "must be a number and not a negative number";
-        }
-
-        return l;
-      })(limit),
-
-      sort: ((s) => {
-        if (typeof s !== "object") return undefined;
-
-        for (const key in s) {
-          if (s.hasOwnProperty(key) && s[key] !== 1 && s[key] !== -1) {
-            errors.sort = {
-              ...(errors.sort as object),
-              [key]: "invalid sort value, must be 1 or -1",
-            };
-          }
-        }
-        return s;
-      })(sort),
-    };
+    if (await dataValidator(sort, "sort", "sort", errors)) {
+      opts.sort = sort;
+    }
 
     const listResult = await listItems(filter, opts);
 

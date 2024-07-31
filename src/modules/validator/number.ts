@@ -1,10 +1,10 @@
-import type { ErrorsDesc, ValidateNumberOpts } from "./index";
+import type { ErrorsDesc, NumberValidateOpts } from "./index";
 
 export default function numberValidator(
   val: any,
   fieldName: string,
   errs: ErrorsDesc,
-  options: ValidateNumberOpts
+  options: NumberValidateOpts
 ): number | false {
   if (options.required && (val === undefined || val === null)) {
     errs[fieldName] = "missing required field";

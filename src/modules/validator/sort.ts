@@ -1,10 +1,10 @@
-import type { ErrorsDesc, ValidateObjectOpts } from ".";
+import type { ErrorsDesc, ObjectValidateOpts } from ".";
 
-export function sortValidator(
+export default function sortValidator(
   val: any,
   fieldName: string,
   errs: ErrorsDesc,
-  options: ValidateObjectOpts
+  options: ObjectValidateOpts
 ): object | false {
   if (options.required && (val === undefined || val === null)) {
     errs[fieldName] = "missing required field";
@@ -20,8 +20,8 @@ export function sortValidator(
   }
 
   const { minProps = 1, maxProps = 1000 } = options;
-  let amountProps = 0;
 
+  let amountProps = 0;
   for (const key in val) {
     if (val.hasOwnProperty(key)) {
       amountProps++;

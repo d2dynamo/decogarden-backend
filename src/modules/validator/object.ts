@@ -1,10 +1,10 @@
-import type { ErrorsDesc, ValidateObjectOpts } from "./index";
+import type { ErrorsDesc, ObjectValidateOpts } from "./index";
 
 export default function objectValidator(
   val: any,
   fieldName: string,
   errs: ErrorsDesc,
-  options: ValidateObjectOpts
+  options: ObjectValidateOpts
 ): object | false {
   if (options.required && (val === undefined || val === null)) {
     errs[fieldName] = "missing required field";

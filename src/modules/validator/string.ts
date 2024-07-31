@@ -1,10 +1,10 @@
-import type { ErrorsDesc, ValidateStringOpts } from "./index";
+import type { ErrorsDesc, StringValidateOpts } from "./index";
 
 export default function stringValidator(
   val: any,
   fieldName: string,
   errs: ErrorsDesc,
-  options: ValidateStringOpts
+  options: StringValidateOpts
 ): string | false {
   if (options.required && (val === undefined || val === null)) {
     errs[fieldName] = "missing required field";

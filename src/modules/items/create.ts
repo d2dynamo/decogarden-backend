@@ -14,6 +14,7 @@ export async function addItem(newItem: AddItem) {
     createdAt: new Date(),
     updatedAt: new Date(),
     amountStorage: newItem.amountStorage ?? 0,
+    active: newItem.active ?? false,
   };
 
   const result = await coll.insertOne(insertDoc);

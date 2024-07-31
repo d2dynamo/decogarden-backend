@@ -3,8 +3,11 @@ import { UserError } from "../../util/error";
 import type { UpdateItem } from "../../global/interfaces/item";
 import { updateItem } from "../../modules/items/update";
 import { stringToObjectId } from "../../modules/database/mongo";
+import { dataValidator } from "../../modules/validator";
 
-type UpdateItemErrors = { [K in keyof UpdateItem]?: string } & { id?: string };
+type UpdateItemErrors = { [K in keyof UpdateItem]?: string | object } & {
+  id?: string;
+};
 
 export default async function (req: Request, res: Response, next: Function) {
   try {
@@ -15,53 +18,59 @@ export default async function (req: Request, res: Response, next: Function) {
 
     const update: UpdateItem = {};
 
-    if (title !== undefined) {
-      if (typeof title !== "string") {
-        errors.title = "must be string";
-      } else if (title.length < 1 || title.length > 100) {
-        errors.title = "must be between 1 and 100 characters long";
-      } else {
-        update.title = title;
-      }
+    if (await dataValidator(id, "title", "string", errors)) {
+      update.title = title;
     }
 
-    if (description !== undefined) {
-      if (typeof description !== "string") {
-        errors.description = "must be string";
-      } else if (description.length < 1 || description.length > 500) {
-        errors.description = "must be between 1 and 500 characters long";
-      } else {
-        update.description = description;
-      }
+    if (await dataValidator(description, "description", "string", errors)) {
+      update.description = description;
     }
 
-    if (price !== undefined) {
-      if (typeof price !== "number" || isNaN(price) || price < 0) {
-        errors.price = "must be a non-negative number";
-      } else {
-        update.price = price;
-      }
+    if (await dataValidator(price, "price", "number", errors)) {
+      update.price = price;
     }
 
-    if (properties !== undefined) {
-      if (typeof properties !== "object") {
-        errors.properties = "must be an object if provided";
-      } else {
-        update.properties = properties;
-      }
+    if (await dataValidator(amountStorage, "amountStorage", "number", errors)) {
+      update.amountStorage = amountStorage;
     }
 
-    if (amountStorage !== undefined) {
-      if (
-        typeof amountStorage !== "number" ||
-        isNaN(amountStorage) ||
-        amountStorage < 0
-      ) {
-        errors.amountStorage = "must be a non-negative number if provided";
-      } else {
-        update.amountStorage = amountStorage;
+    if (
+      await dataValidator(properties, "properties", "object", errors, {
+        maxProps: 8,
+      })
+    ) {
+      const keys = Object.keys(properties);
+
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
+        const v = properties[k];
+
+        errors.properties = {};
+
+        if (
+          await dataValidator(v, `properties.${k}`, "string", errors, {
+            minLength: 1,
+            maxLength: 50,
+          })
+        ) {
+          continue;
+        }
+        if (
+          await dataValidator(v, `properties.${k}`, "number", errors, {
+            min: 1,
+          })
+        ) {
+          continue;
+        }
+
+        errors.properties[k] = "must be a string or number";
+        delete properties[k];
       }
+
+      update.properties = properties;
     }
+
+    // We letting the validator run first before checking if the id is even valid so that we can return an errors object with info on data validation errors.
 
     const itemObjId = await stringToObjectId(id);
 
