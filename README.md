@@ -18,6 +18,10 @@ bun start
 
 code & runtime dynamic validation.
 
+## Unit tests
+
+Jest probably
+
 ## User permissions
 
 ## Redis

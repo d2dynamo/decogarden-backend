@@ -1,20 +1,20 @@
 import type { ListOptionSort } from "./controller";
+import type { ItemDoc, Dates } from "./database";
 
-export interface AddItem {
+export interface Item extends Partial<Omit<ItemDoc, Dates>> {
+  id: string;
   title: string;
-  description: string;
   price: number;
-  properties?: { [key: string]: any };
-  amountStorage?: number;
+  active: boolean;
+  createdAt: number;
+  updatedAt: number;
+  description?: string;
+  properties?: { [key: string]: string | number | object };
 }
 
-export interface UpdateItem {
-  title?: string;
-  description?: string;
-  price?: number;
-  properties?: { [key: string]: any };
-  amountStorage?: number;
-}
+export interface AddItem extends Omit<ItemDoc, Dates> {}
+
+export interface UpdateItem extends Partial<Omit<ItemDoc, Dates>> {}
 
 export interface GetItem {
   id: string;
@@ -32,3 +32,6 @@ export interface ListItemSorts extends ListOptionSort {
   createdAt: 1 | -1;
   updatedAt: 1 | -1;
 }
+
+export interface ListItem
+  extends Pick<Item, "id" | "title" | "price" | "amountStorage"> {}

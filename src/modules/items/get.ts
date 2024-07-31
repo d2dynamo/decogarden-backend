@@ -5,19 +5,14 @@ import { UserError } from "../../util/error";
 import type {
   ListItemFilter,
   ListItemSorts,
+  Item,
+  ListItem,
 } from "../../global/interfaces/item";
-
-interface ItemInList {
-  id: string;
-  title: string;
-  price: number; // float in euro
-  amountStorage: number;
-}
 
 export async function listItems(
   filter?: ListItemFilter,
   listOpts?: ListOptions<ListItemSorts>
-): Promise<ItemInList[]> {
+): Promise<ListItem[]> {
   const coll = await connectCollection("items");
 
   const query: any = {};
@@ -61,7 +56,7 @@ export async function listItems(
     .skip(skip)
     .limit(pageSize);
 
-  const items: ItemInList[] = [];
+  const items: ListItem[] = [];
   while (await cursor.hasNext()) {
     const doc = await cursor.next();
 
@@ -85,18 +80,9 @@ export async function listItems(
   return items;
 }
 
-interface ItemReturn {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  properties?: { [key: string]: any };
-  amountStorage: number;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export async function getItem(itemId: ObjectId | string) {
+export async function getItem(
+  itemId: ObjectId | string
+): Promise<Omit<Item, "id">> {
   const itemObjId = await stringToObjectId(itemId);
 
   if (!itemObjId) {
@@ -121,7 +107,8 @@ export async function getItem(itemId: ObjectId | string) {
     price: item.price,
     properties: item.properties,
     amountStorage: item.amountStorage || 0,
-    createdAt: item.createdAt.getTime(),
-    updatedAt: item.updatedAt.getTime(),
+    active: item.active || false,
+    createdAt: item.createdAt?.getTime() || 0,
+    updatedAt: item.updatedAt?.getTime() || 0,
   };
 }

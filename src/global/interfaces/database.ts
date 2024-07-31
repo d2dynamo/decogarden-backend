@@ -10,25 +10,25 @@ type OrderStatus =
 type LogType = "ERROR" | "INFO" | "WARN";
 type LogLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-// TODO: Fix _id problem. when inserting new document we want mongodb to handle creating _id but with generics demand the _id to be defined on doc insert.
 interface DefaultDocument {
-  _id?: ObjectId; //Needs to be optional for now.
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
+
+export type Dates = "createdAt" | "updatedAt";
 
 /** Collection document standard defs */
 export type CollectionDocs = {
-  users: User;
-  items: Item;
-  orders: Order;
-  priceReductions: PriceReduction;
+  users: UserDoc;
+  items: ItemDoc;
+  orders: OrderDoc;
+  priceReductions: PriceReductionDoc;
 };
 
 /** Available collections in bonkbot database */
 export type DekoCollections = keyof CollectionDocs;
 
-export interface User extends DefaultDocument {
+export interface UserDoc extends DefaultDocument {
   email: string;
   hash: string;
   salt: string;
@@ -36,15 +36,16 @@ export interface User extends DefaultDocument {
   lastLogin: Date;
 }
 
-export interface Item extends DefaultDocument {
+export interface ItemDoc extends DefaultDocument {
   title: string;
-  description: string;
+  description?: string;
   price: number; //float in euro
-  properties?: { [key: string]: any };
-  amountStorage: number;
+  properties?: { [key: string]: string | number | object };
+  amountStorage?: number;
+  active: boolean;
 }
 
-export interface Order {
+export interface OrderDoc {
   customerId: ObjectId;
   itemId: ObjectId;
   note?: string;
@@ -53,7 +54,7 @@ export interface Order {
   priceReductionId?: ObjectId;
 }
 
-export interface PriceReduction {
+export interface PriceReductionDoc {
   itemId: ObjectId;
   percent?: number;
   flat?: number;
@@ -63,7 +64,7 @@ export interface PriceReduction {
   updatedAt: Date;
 }
 
-export interface Logs {
+export interface LogDoc {
   type: LogType;
   level: LogLevel;
   userId?: ObjectId;
@@ -71,4 +72,4 @@ export interface Logs {
   data: { [key: string]: any };
 }
 
-export interface Shipment {}
+export interface ShipmentDoc {}
