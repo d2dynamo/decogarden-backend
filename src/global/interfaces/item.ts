@@ -1,4 +1,4 @@
-import type { ListOptionSort } from "./controller";
+import type { SortOption } from "./controller";
 import type { ItemDoc, Dates } from "./database";
 
 export interface Item extends Partial<Omit<ItemDoc, Dates>> {
@@ -12,7 +12,9 @@ export interface Item extends Partial<Omit<ItemDoc, Dates>> {
   properties?: { [key: string]: string | number | object };
 }
 
-export interface AddItem extends Omit<ItemDoc, Dates> {}
+export interface AddItem extends Omit<ItemDoc, Dates | "active"> {
+  active?: boolean;
+}
 
 export interface UpdateItem extends Partial<Omit<ItemDoc, Dates>> {}
 
@@ -26,7 +28,7 @@ export interface ListItemFilter {
   priceLte?: string;
 }
 
-export interface ListItemSorts extends ListOptionSort {
+export interface ListItemSorts extends SortOption {
   title: 1 | -1;
   price: 1 | -1;
   createdAt: 1 | -1;

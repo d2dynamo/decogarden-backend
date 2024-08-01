@@ -1,3 +1,5 @@
+import { expect, test } from "bun:test";
+
 import { dataValidator } from "../src/modules/validator";
 
 test("dataValidatorString", async () => {
