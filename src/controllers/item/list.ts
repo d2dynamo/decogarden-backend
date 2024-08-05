@@ -15,10 +15,10 @@ type ListItemsErrors = {
 };
 
 export default async function (req: Request, res: Response, next: Function) {
+  const errors: ListItemsErrors = {};
+
   try {
     const { title, priceGte, priceLte, page, pageSize, limit, sort } = req.body;
-
-    const errors: ListItemsErrors = {};
 
     const filter: ListItemFilter = {};
 

@@ -11,7 +11,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "bad id",
+        message: "item id invalid",
       };
       next();
       return;
@@ -21,7 +21,7 @@ export default async function (req: Request, res: Response, next: Function) {
 
     if (!itemObjId) {
       res.locals = {
-        errors: true,
+        error: true,
         code: 400,
         message: "item id invalid",
       };

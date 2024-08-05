@@ -12,15 +12,22 @@ To run:
 bun start
 ```
 
+# Test env variables
+
+JWT_PRIVATE_KEY_PATH
+JWT_PUBLIC_KEY_PATH
+SESSION_SECRET
+
+MONGO_URL
+MONGO_DB_NAME
+MONGO_CA
+MONGO_CERT
+
 # TODO
-
-## Req data validation
-
-code & runtime dynamic validation.
 
 ## Unit tests
 
-Jest probably
+using bun:test.
 
 ## User permissions
 

@@ -4,9 +4,9 @@ import connectCollection from "../database/mongo";
 /** Inserts new item. If failed to insert throws error.
  *
  * @param newItem {AddItem}
- * @returns boolean
+ * @returns inserted item id
  */
-export async function addItem(newItem: AddItem) {
+export async function addItem(newItem: AddItem): Promise<string> {
   console.log("addItem called", newItem);
   const coll = await connectCollection("items");
 
@@ -21,8 +21,8 @@ export async function addItem(newItem: AddItem) {
   const result = await coll.insertOne(insertDoc);
 
   if (!result.acknowledged) {
-    throw new Error("Failed to insert item");
+    throw new Error("failed to insert item");
   }
 
-  return true;
+  return result.insertedId.toString();
 }

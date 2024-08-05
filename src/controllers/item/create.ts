@@ -7,7 +7,7 @@ import { dataValidator } from "../../modules/validator";
 type AddItemErrors = { [K in keyof AddItem]?: string | object };
 
 export default async function (req: Request, res: Response, next: Function) {
-  const er: AddItemErrors = {};
+  const errs: AddItemErrors = {};
 
   try {
     const { title, description, price, properties, amountStorage, active } =
@@ -16,7 +16,7 @@ export default async function (req: Request, res: Response, next: Function) {
     const newItem: any = {};
 
     if (
-      await dataValidator(title, "title", "string", er, {
+      await dataValidator(title, "title", "string", errs, {
         required: true,
         minLength: 1,
         maxLength: 50,
@@ -24,84 +24,81 @@ export default async function (req: Request, res: Response, next: Function) {
     )
       newItem.title = title;
 
-    if (await dataValidator(price, "price", "number", er, { required: true }))
+    if (await dataValidator(price, "price", "number", errs, { required: true }))
       newItem.price = price;
 
     if (
-      await dataValidator(properties, "properties", "object", er, {
+      await dataValidator(properties, "properties", "object", errs, {
         maxProps: 8,
       })
     ) {
       const keys = Object.keys(properties);
 
+      errs.properties = {};
       for (let i = 0; i > keys.length; i++) {
         const k = keys[i];
         const v = properties[k];
 
-        er.properties = {};
-
         if (
-          await dataValidator(v, `properties.${k}`, "string", er, {
+          await dataValidator(v, `properties.${k}`, "string", errs, {
             minLength: 1,
             maxLength: 50,
           })
         ) {
           continue;
         }
+        delete errs[`properties.${k}`];
+
         if (
-          await dataValidator(v, `properties.${k}`, "number", er, {
+          await dataValidator(v, `properties.${k}`, "number", errs, {
             min: 1,
           })
         ) {
           continue;
         }
+        delete errs[`properties.${k}`];
 
-        er.properties[k] = "must be a string or number";
+        errs.properties[k] = "must be a string or number";
         delete properties[k];
       }
+      if (Object.keys(errs.properties).length == 0) delete errs.properties;
 
       newItem.properties = properties;
     }
 
-    if (await dataValidator(amountStorage, "amountStorage", "number", er))
+    if (await dataValidator(amountStorage, "amountStorage", "number", errs))
       newItem.amountStorage = amountStorage;
 
-    if (await dataValidator(active, "active", "boolean", er))
+    if (await dataValidator(active, "active", "boolean", errs))
       newItem.active = active;
 
     if (
-      await dataValidator(description, "description", "string", er, {
+      await dataValidator(description, "description", "string", errs, {
         minLength: 1,
         maxLength: 150,
       })
     )
       newItem.description = description;
 
-    if (er.title || er.price) {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: "missing required fields",
-        payload: {
-          errors: er,
-        },
-      };
-      next();
-      return;
+    if (errs.title || errs.price) {
+      throw new UserError("missing required fields", 400);
     }
 
-    await addItem(newItem);
+    const insId = await addItem(newItem);
 
     res.locals = {
       error: false,
       code: 200,
       message: "success",
       payload:
-        Object.keys(er).length > 0
+        Object.keys(errs).length > 0
           ? {
-              errors: er,
+              insertedId: insId,
+              errors: errs,
             }
-          : {},
+          : {
+              insertedId: insId,
+            },
     };
     next();
   } catch (err) {
@@ -111,9 +108,9 @@ export default async function (req: Request, res: Response, next: Function) {
         code: err.code || 400,
         message: err.message || "unknown client error",
         payload:
-          Object.keys(er).length > 0
+          Object.keys(errs).length > 0
             ? {
-                errors: er,
+                errors: errs,
               }
             : {},
       };
@@ -128,9 +125,9 @@ export default async function (req: Request, res: Response, next: Function) {
       code: 500,
       message: "internal server error",
       payload:
-        Object.keys(er).length > 0
+        Object.keys(errs).length > 0
           ? {
-              errors: er,
+              errors: errs,
             }
           : {},
     };

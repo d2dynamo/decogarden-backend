@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "bun ./src/index.ts",
-    "test": "jest"
+    "test": "bun --env-file=./.env.test test"
   },
   "devDependencies": {
     "@types/bun": "latest",

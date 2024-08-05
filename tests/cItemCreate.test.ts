@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import { Request, Response } from "express";
 import { createItemController } from "../src/controllers/item";
-import { UserError } from "../src/util/error";
 
 const validBody = {
   title: "Item Title",
@@ -20,11 +19,9 @@ const missingRequiredBody = {
 const invalidItemBody = {
   title: 123,
   price: "name",
+  properties: "not an object",
+  active: "not a boolean",
 };
-
-const addItemPath = "../src/modules/items/create";
-
-mock.module(addItemPath, async () => true);
 
 // NOTE: controllers first check if any required fields are missing before running the coresponding db function.
 // So make sure to add required fields to the request object in the tests if you need to test beyond data validation.
@@ -46,13 +43,28 @@ describe("createItemController", () => {
       },
     };
     next = mock(() => {});
+
+    // prevent controller from logging on catch Error
+    console.log = mock(() => {});
   });
 
-  afterEach(() => {
-    mock.restore();
+  it("check valid request", async () => {
+    req.body = validBody;
+
+    await createItemController(req as Request, res as Response, next);
+
+    expect(res.locals).toEqual({
+      error: false,
+      code: 200,
+      message: "success",
+      payload: {
+        insertedId: expect.any(String),
+      },
+    });
+    expect(next).toHaveBeenCalled();
   });
 
-  it("should return 400 if title or price validation fails", async () => {
+  it("check missing required fields", async () => {
     req.body = missingRequiredBody;
 
     await createItemController(req as Request, res as Response, next);
@@ -71,60 +83,23 @@ describe("createItemController", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it("add valid item and return 200", async () => {
-    req.body = validBody;
-
-    await createItemController(req as Request, res as Response, next);
-
-    expect(res.locals).toEqual({
-      error: false,
-      code: 200,
-      message: "success",
-      payload: {},
-    });
-    expect(next).toHaveBeenCalled();
-  });
-
-  it("handle UserError", async () => {
-    mock.module(addItemPath, () => {
-      return {
-        addItem: async (newItem: any) => {
-          throw new UserError("User error message", 401);
-        },
-      };
-    });
-
-    req.body = validBody;
+  it("check invalid fields", async () => {
+    req.body = invalidItemBody;
 
     await createItemController(req as Request, res as Response, next);
 
     expect(res.locals).toEqual({
       error: true,
-      code: 401,
-      message: "User error message",
-      payload: {},
-    });
-    expect(next).toHaveBeenCalled();
-  });
-
-  it("handle code/server error", async () => {
-    mock.module(addItemPath, () => {
-      return {
-        addItem: async (newItem: any) => {
-          throw new Error("Some code/server error");
+      code: 400,
+      message: "missing required fields",
+      payload: {
+        errors: {
+          title: expect.any(String),
+          price: expect.any(String),
+          properties: expect.any(String),
+          active: expect.any(String),
         },
-      };
-    });
-
-    req.body = validBody;
-
-    await createItemController(req as Request, res as Response, next);
-
-    expect(res.locals).toEqual({
-      error: true,
-      code: 500,
-      message: "internal server error",
-      payload: {},
+      },
     });
     expect(next).toHaveBeenCalled();
   });

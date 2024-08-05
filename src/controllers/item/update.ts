@@ -11,14 +11,14 @@ type UpdateItemErrors = { [K in keyof UpdateItem]?: string | object } & {
 
 export default async function (req: Request, res: Response, next: Function) {
   try {
-    const { id, title, description, price, properties, amountStorage } =
+    const { id, title, description, price, properties, active, amountStorage } =
       req.body;
 
     const errors: UpdateItemErrors = {};
 
     const update: UpdateItem = {};
 
-    if (await dataValidator(id, "title", "string", errors)) {
+    if (await dataValidator(title, "title", "string", errors)) {
       update.title = title;
     }
 
@@ -34,6 +34,10 @@ export default async function (req: Request, res: Response, next: Function) {
       update.amountStorage = amountStorage;
     }
 
+    if (await dataValidator(active, "active", "boolean", errors)) {
+      update.active = active;
+    }
+
     if (
       await dataValidator(properties, "properties", "object", errors, {
         maxProps: 8,
@@ -41,11 +45,10 @@ export default async function (req: Request, res: Response, next: Function) {
     ) {
       const keys = Object.keys(properties);
 
+      errors.properties = {};
       for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
         const v = properties[k];
-
-        errors.properties = {};
 
         if (
           await dataValidator(v, `properties.${k}`, "string", errors, {
@@ -55,6 +58,8 @@ export default async function (req: Request, res: Response, next: Function) {
         ) {
           continue;
         }
+        delete errors[`properties.${k}`];
+
         if (
           await dataValidator(v, `properties.${k}`, "number", errors, {
             min: 1,
@@ -62,10 +67,13 @@ export default async function (req: Request, res: Response, next: Function) {
         ) {
           continue;
         }
+        delete errors[`properties.${k}`];
 
         errors.properties[k] = "must be a string or number";
         delete properties[k];
       }
+
+      if (Object.keys(errors.properties).length == 0) delete errors.properties;
 
       update.properties = properties;
     }
