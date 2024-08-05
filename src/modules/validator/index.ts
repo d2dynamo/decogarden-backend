@@ -61,6 +61,20 @@ import booleanValidator from "./boolean";
 import objectValidator from "./object";
 import sortValidator from "./sort";
 
+type returnType<T> = T extends "number"
+  ? number | false
+  : T extends "string"
+  ? string | false
+  : T extends "array"
+  ? any[] | false
+  : T extends "boolean"
+  ? boolean | false
+  : T extends "object"
+  ? object | false
+  : T extends "sort"
+  ? object | false
+  : false;
+
 /**
  *
  * @param val variable to validate
@@ -76,22 +90,50 @@ export async function dataValidator<ET extends ExpectType>(
   expect: ET,
   errs: ErrorsDesc,
   options?: ValidatorOptions<ET>
-): Promise<ET | false> {
+): Promise<returnType<ET>> {
   switch (expect) {
     case "number":
-      return numberValidator(val, fieldName, errs, options || {}) as ET | false;
+      return numberValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     case "string":
-      return stringValidator(val, fieldName, errs, options || {}) as ET | false;
+      return stringValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     case "array":
-      return arrayValidator(val, fieldName, errs, options || {}) as ET | false;
+      return arrayValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     case "boolean":
-      return booleanValidator(val, fieldName, errs, options || {}) as
-        | ET
-        | false;
+      return booleanValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     case "object":
-      return objectValidator(val, fieldName, errs, options || {}) as ET | false;
+      return objectValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     case "sort":
-      return sortValidator(val, fieldName, errs, options || {}) as ET | false;
+      return sortValidator(
+        val,
+        fieldName,
+        errs,
+        options || {}
+      ) as returnType<ET>;
     default:
       throw new Error(`invalid expected type in dataValidator: ${expect}`);
   }

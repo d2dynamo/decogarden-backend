@@ -22,7 +22,7 @@ export type CollectionDocs = {
   users: UserDoc;
   items: ItemDoc;
   orders: OrderDoc;
-  priceReductions: PriceReductionDoc;
+  coupons: CouponDoc;
 };
 
 /** Available collections in bonkbot database */
@@ -51,11 +51,12 @@ export interface OrderDoc {
   note?: string;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
-  priceReductionId?: ObjectId;
+  couponId?: ObjectId;
 }
 
-export interface PriceReductionDoc {
-  itemId: ObjectId;
+export interface CouponDoc {
+  itemId?: ObjectId;
+  userId?: ObjectId;
   percent?: number;
   flat?: number;
   validFrom?: Date;

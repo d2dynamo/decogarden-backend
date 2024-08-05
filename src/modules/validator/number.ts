@@ -30,5 +30,5 @@ export default function numberValidator(
     return false;
   }
 
-  return val;
+  return Number(val);
 }

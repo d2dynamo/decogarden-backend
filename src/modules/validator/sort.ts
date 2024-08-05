@@ -39,6 +39,7 @@ export default function sortValidator(
         ...(errs.sort as object),
         [key]: "invalid sort value, must be 1 or -1",
       };
+      return false;
     }
   }
 

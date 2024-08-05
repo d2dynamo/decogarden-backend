@@ -30,7 +30,7 @@ export default function objectValidator(
     if (maxProps !== undefined && amountProps > maxProps) {
       errs[
         fieldName
-      ] = `object property count out of range (${minProps}-${maxProps})`;
+      ] = `object property count out of range (min:${minProps} max:${maxProps})`;
       return false;
     }
   }
@@ -38,7 +38,7 @@ export default function objectValidator(
   if (minProps !== undefined && amountProps < minProps) {
     errs[
       fieldName
-    ] = `object property count out of range (${minProps}-${maxProps})`;
+    ] = `object property count out of range (min:${minProps} max:${maxProps})`;
     return false;
   }
 
