@@ -7,6 +7,7 @@ import connectCollection from "../database/mongo";
  * @returns boolean
  */
 export async function addItem(newItem: AddItem) {
+  console.log("addItem called", newItem);
   const coll = await connectCollection("items");
 
   const insertDoc = {

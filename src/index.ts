@@ -57,6 +57,13 @@ if (process.env.NODE_ENV === "development") {
       });
 
       console.log(`AccessToken: ${at}`);
+
+      const dbn =
+        process.env.NODE_ENV === "development"
+          ? "dekosodas_dev"
+          : process.env.MONGO_DB_NAME;
+
+      console.log(`using dbname ${dbn}`);
       return;
     } catch (err) {
       console.error(err);

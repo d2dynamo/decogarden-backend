@@ -7,11 +7,12 @@ import { dataValidator } from "../../modules/validator";
 type AddItemErrors = { [K in keyof AddItem]?: string | object };
 
 export default async function (req: Request, res: Response, next: Function) {
+  const er: AddItemErrors = {};
+
   try {
     const { title, description, price, properties, amountStorage, active } =
       req.body;
 
-    const er: AddItemErrors = {};
     const newItem: any = {};
 
     if (
@@ -23,7 +24,7 @@ export default async function (req: Request, res: Response, next: Function) {
     )
       newItem.title = title;
 
-    if (await dataValidator(price, "price", "number", er))
+    if (await dataValidator(price, "price", "number", er, { required: true }))
       newItem.price = price;
 
     if (
@@ -109,6 +110,12 @@ export default async function (req: Request, res: Response, next: Function) {
         error: true,
         code: err.code || 400,
         message: err.message || "unknown client error",
+        payload:
+          Object.keys(er).length > 0
+            ? {
+                errors: er,
+              }
+            : {},
       };
       next();
       return;
@@ -120,6 +127,12 @@ export default async function (req: Request, res: Response, next: Function) {
       error: true,
       code: 500,
       message: "internal server error",
+      payload:
+        Object.keys(er).length > 0
+          ? {
+              errors: er,
+            }
+          : {},
     };
     next();
   }

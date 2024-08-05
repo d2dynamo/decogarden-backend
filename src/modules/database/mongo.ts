@@ -19,6 +19,7 @@ export default async function connectCollection<T extends DekoCollections>(
     process.env.NODE_ENV === "development"
       ? "dekosodas_dev"
       : process.env.MONGO_DB_NAME;
+
   if (client) {
     return client.db(dbn).collection<CollectionDocs[T]>(collName);
   }
