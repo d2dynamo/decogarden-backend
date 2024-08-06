@@ -12,22 +12,26 @@ To run:
 bun start
 ```
 
-# Test env variables
+Unit tests:
 
-JWT_PRIVATE_KEY_PATH
-JWT_PUBLIC_KEY_PATH
+```bash
+bun test
+```
+
+# Unit test env variables
+
+.env.test:
+
+JWT_PRIVATE_KEY_PATH  
+JWT_PUBLIC_KEY_PATH  
 SESSION_SECRET
 
-MONGO_URL
-MONGO_DB_NAME
-MONGO_CA
+MONGO_URL  
+MONGO_DB_NAME //preferably use a test db  
+MONGO_CA  
 MONGO_CERT
 
 # TODO
-
-## Unit tests
-
-using bun:test.
 
 ## User permissions
 
@@ -40,5 +44,7 @@ using bun:test.
 ## Logging
 
 ## Orders and shipments
+
+## Finish unit tests
 
 ## Payment
