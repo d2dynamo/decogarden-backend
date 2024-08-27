@@ -15,5 +15,10 @@ declare namespace NodeJS {
     MONGO_DB_NAME?: string;
     MONGO_CA?: string;
     MONGO_CERT?: string;
+
+    // -- Redis --
+    REDIS_URL?: string;
+    REDIS_PASSWORD?: string;
+    REDIS_PREFIX?: string;
   }
 }
