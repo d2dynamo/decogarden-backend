@@ -10,12 +10,17 @@ type OrderStatus =
 type LogType = "ERROR" | "INFO" | "WARN";
 type LogLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-interface DefaultDocument {
-  createdAt?: Date;
-  updatedAt?: Date;
+interface DefaultDoc {
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type Dates = "createdAt" | "updatedAt";
+
+/**
+ *  NOTE: All docs have a _id.
+ * We do not include it here cause its simpler to insert docs that way. mongo driver inserts _id as optional existing type in fetch functions.
+ */
 
 /** Collection document standard defs */
 export type CollectionDocs = {
@@ -23,12 +28,14 @@ export type CollectionDocs = {
   items: ItemDoc;
   orders: OrderDoc;
   coupons: CouponDoc;
+  permissions: PermissionDoc;
+  userPermissions: UserPermissionDoc;
 };
 
 /** Available collections in bonkbot database */
 export type DekoCollections = keyof CollectionDocs;
 
-export interface UserDoc extends DefaultDocument {
+export interface UserDoc extends DefaultDoc {
   email: string;
   hash: string;
   salt: string;
@@ -36,7 +43,7 @@ export interface UserDoc extends DefaultDocument {
   lastLogin: Date;
 }
 
-export interface ItemDoc extends DefaultDocument {
+export interface ItemDoc extends DefaultDoc {
   title: string;
   description?: string;
   price: number; //float in euro
@@ -45,7 +52,7 @@ export interface ItemDoc extends DefaultDocument {
   active: boolean;
 }
 
-export interface OrderDoc {
+export interface OrderDoc extends DefaultDoc {
   customerId: ObjectId;
   itemId: ObjectId;
   note?: string;
@@ -54,15 +61,13 @@ export interface OrderDoc {
   couponId?: ObjectId;
 }
 
-export interface CouponDoc {
+export interface CouponDoc extends DefaultDoc {
   itemId?: ObjectId;
   userId?: ObjectId;
   percent?: number;
   flat?: number;
   validFrom?: Date;
   validTo: Date;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface LogDoc {
@@ -71,6 +76,20 @@ export interface LogDoc {
   userId?: ObjectId;
   message: string;
   data: { [key: string]: any };
+  createdAt: Date;
+}
+
+export type PermissionName = "basic" | "admin";
+
+export interface PermissionDoc extends DefaultDoc {
+  name: string;
+  active: boolean;
+}
+
+export interface UserPermissionDoc extends DefaultDoc {
+  userId: ObjectId;
+  permissionId: ObjectId;
+  active: boolean;
 }
 
 export interface ShipmentDoc {}

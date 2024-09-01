@@ -35,8 +35,6 @@ MONGO_CERT
 
 ## User permissions
 
-## Redis
-
 ## User email verify
 
 ## Better tokens?

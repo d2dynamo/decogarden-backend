@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import type { UpdateItem } from "../../global/interfaces/item";
+import type { UpdateItem } from "../../global/interfaces/items";
 import { updateItem } from "../../modules/items/update";
 import { stringToObjectId } from "../../modules/database/mongo";
 import { dataValidator } from "../../modules/validator";

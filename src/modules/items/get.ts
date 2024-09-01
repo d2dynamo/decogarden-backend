@@ -7,7 +7,7 @@ import type {
   ListItemSorts,
   Item,
   ListItem,
-} from "../../global/interfaces/item";
+} from "../../global/interfaces/items";
 
 export async function listItems(
   filter?: ListItemFilter,

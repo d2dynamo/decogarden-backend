@@ -3,7 +3,7 @@ import { UserError } from "../../util/error";
 import type {
   ListItemFilter,
   ListItemSorts,
-} from "../../global/interfaces/item";
+} from "../../global/interfaces/items";
 import { listItems } from "../../modules/items/get";
 import type { ListOptions } from "../../global/interfaces/controller";
 import { dataValidator } from "../../modules/validator";

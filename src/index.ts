@@ -9,7 +9,6 @@ import { createServer as http } from "http";
 import { readFileSync } from "fs";
 import rateLimit from "express-rate-limit";
 import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
 import session from "express-session";
 
 import cors from "./middlewares/cors";
@@ -30,7 +29,7 @@ let ServerShuttingDown = false;
 
 async function interruptSignalHandler(signal: string) {
   console.log(
-    `Received ${signal}, shutting down gracefully, pid: ${process.pid}`
+    `Received ${signal}, shutting down gracefully, pid: ${process.pid}`,
   );
 
   ServerShuttingDown = true;
@@ -124,7 +123,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true },
-  })
+  }),
 );
 
 app.use((req, res, next) => {
@@ -188,7 +187,7 @@ const httpsServer = https(
     key,
     cert,
   },
-  app
+  app,
 );
 const httpServer = http({}, app);
 

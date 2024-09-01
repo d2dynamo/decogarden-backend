@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
 import { addItem } from "../../modules/items/create";
-import type { AddItem } from "../../global/interfaces/item";
+import type { AddItem } from "../../global/interfaces/items";
 import { dataValidator } from "../../modules/validator";
 
 type AddItemErrors = { [K in keyof AddItem]?: string | object };

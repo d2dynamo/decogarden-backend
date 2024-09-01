@@ -12,7 +12,7 @@ interface User {
   updatedAt: number; //unix milis
 }
 
-export default async function (id: ObjectId | string): Promise<User> {
+export default async function getUser(id: ObjectId | string): Promise<User> {
   const userObjId = await stringToObjectId(id);
 
   if (!userObjId) {
