@@ -1,42 +1,17 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import { getItem } from "../../modules/items";
-import { stringToObjectId } from "../../modules/database/mongo";
+import { listPermissions } from "../../modules/permissions";
 
 export default async function (req: Request, res: Response, next: Function) {
   try {
-    const { id } = req.params;
-
-    if (!id || typeof id !== "string") {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: "item id invalid",
-      };
-      next();
-      return;
-    }
-
-    const itemObjId = await stringToObjectId(id);
-
-    if (!itemObjId) {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: "item id invalid",
-      };
-      next();
-      return;
-    }
-
-    const item = await getItem(id);
+    const result = await listPermissions();
 
     res.locals = {
       error: false,
       code: 200,
       message: "success",
       payload: {
-        item,
+        data: result,
       },
     };
     next();
@@ -51,7 +26,7 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("getItem controller: ", err);
+    console.log(err);
 
     res.locals = {
       error: true,

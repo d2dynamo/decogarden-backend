@@ -1,20 +1,12 @@
-import type { ObjectId } from "mongodb";
 import connectCollection from "../database/mongo";
-
-interface PermissionItem {
-  id: ObjectId;
-  name: string;
-  active: boolean;
-  createdAt: number;
-  updatedAt: number;
-}
+import type { ListPermission } from "./types";
 
 export default async function () {
   const coll = await connectCollection("permissions");
 
   const cursor = coll.find({});
 
-  const perms: PermissionItem[] = [];
+  const perms: ListPermission[] = [];
 
   while (await cursor.hasNext()) {
     const item = await cursor.next();
@@ -24,7 +16,7 @@ export default async function () {
     }
 
     perms.push({
-      id: item._id,
+      id: item._id.toString(),
       name: item.name || "unknown permission",
       active: item.active || false,
       createdAt: item.createdAt.getTime(),

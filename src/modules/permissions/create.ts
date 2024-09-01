@@ -1,11 +1,12 @@
 import connectCollection from "../database/mongo";
+import type { AddPermission } from "./types";
 
-export default async function (name: string) {
+export default async function (addPerm: AddPermission) {
   const coll = await connectCollection("permissions");
 
   const result = await coll.insertOne({
-    name: name,
-    active: true,
+    name: addPerm.name,
+    active: addPerm.active ?? true,
     createdAt: new Date(),
     updatedAt: new Date(),
   });

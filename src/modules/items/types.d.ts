@@ -1,7 +1,7 @@
-import type { SortOption } from "./controller";
-import type { ItemDoc, Dates } from "./database";
+import type { SortOption } from "../../global/interfaces/controller";
+import type { ItemDoc, Dates } from "../../global/interfaces/database";
 
-export interface Item extends Partial<Omit<ItemDoc, Dates>> {
+export interface Item extends Omit<ItemDoc, Dates> {
   id: string;
   title: string;
   price: number;

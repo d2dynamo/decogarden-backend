@@ -1,12 +1,9 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import type {
-  ListItemFilter,
-  ListItemSorts,
-} from "../../global/interfaces/items";
-import { listItems } from "../../modules/items/get";
+import type { ListItemFilter, ListItemSorts } from "../../modules/items/types";
 import type { ListOptions } from "../../global/interfaces/controller";
 import { dataValidator } from "../../modules/validator";
+import { listItems } from "../../modules/items";
 
 type ListItemsErrors = {
   [K in keyof ListItemFilter]?: string | object;

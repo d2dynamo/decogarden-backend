@@ -1,4 +1,4 @@
-import type { AddItem } from "../../global/interfaces/items";
+import type { AddItem } from "./types";
 import connectCollection from "../database/mongo";
 
 /** Inserts new item. If failed to insert throws error.
@@ -6,7 +6,7 @@ import connectCollection from "../database/mongo";
  * @param newItem {AddItem}
  * @returns inserted item id
  */
-export async function addItem(newItem: AddItem): Promise<string> {
+export default async function addItem(newItem: AddItem): Promise<string> {
   const coll = await connectCollection("items");
 
   const insertDoc = {

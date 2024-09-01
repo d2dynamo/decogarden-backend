@@ -1,30 +1,37 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import type { AddPermission } from "../../modules/permissions/types";
+import type { AddUserPermission } from "../../modules/userPermissions/types";
 import { dataValidator } from "../../modules/validator";
-import { createPermission } from "../../modules/permissions";
 
-type AddPermissionErrors = { [K in keyof AddPermission]?: string | object };
+type AddUserPermissionErrors = {
+  [K in keyof AddUserPermission]?: string | object;
+};
 
 export default async function (req: Request, res: Response, next: Function) {
-  const errs: AddPermissionErrors = {};
+  const errs: AddUserPermissionErrors = {};
 
   try {
-    const { name, active } = req.body;
+    const { userId, permissionId, active } = req.body;
 
-    const newPermission: any = {};
+    const newUserPermission: any = {};
 
     if (
-      await dataValidator(name, "name", "string", errs, {
-        required: true,
-        minLength: 1,
-        maxLength: 50,
-      })
-    )
-      newPermission.name = name;
+      await dataValidator(userId, "userId", "string", errs, { required: true })
+    ) {
+      newUserPermission.userId = userId;
+    }
 
-    if (await dataValidator(active, "active", "boolean", errs))
-      newPermission.active = active;
+    if (
+      await dataValidator(permissionId, "permissionId", "string", errs, {
+        required: true,
+      })
+    ) {
+      newUserPermission.permissionId = permissionId;
+    }
+
+    if (await dataValidator(active, "active", "boolean", errs)) {
+      newUserPermission.active = active;
+    }
 
     if (Object.keys(errs).length) {
       res.locals = {
@@ -36,16 +43,6 @@ export default async function (req: Request, res: Response, next: Function) {
       next();
       return;
     }
-
-    const result = await createPermission(newPermission);
-
-    res.locals = {
-      error: false,
-      code: 200,
-      message: "success",
-      payload: { permissionId: result },
-    };
-    next();
   } catch (err) {
     if (err instanceof UserError) {
       res.locals = {
@@ -63,7 +60,7 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("createPermission ctrl:", err);
+    console.log("createUserPermission ctrl:", err);
 
     res.locals = {
       error: true,
