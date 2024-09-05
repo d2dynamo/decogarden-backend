@@ -2,8 +2,6 @@ import type { PermissionDoc, Dates } from "../../global/interfaces/database";
 
 export interface Permission extends Omit<PermissionDoc, Dates> {
   id: string;
-  name: string;
-  active: boolean;
   createdAt: number;
   updatedAt: number;
 }

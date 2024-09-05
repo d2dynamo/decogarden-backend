@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import type { AddUserPermission } from "../../modules/userPermissions/types";
+import type { SetUserPermission } from "../../modules/userPermissions/types";
 import { dataValidator } from "../../modules/validator";
+import userHasPermission from "../../modules/userPermissions/get";
+import { PermissionsEnum } from "../../global/interfaces/permissions";
 
 type AddUserPermissionErrors = {
-  [K in keyof AddUserPermission]?: string | object;
+  [K in keyof SetUserPermission]?: string | object;
 };
 
 export default async function (req: Request, res: Response, next: Function) {
@@ -12,6 +14,17 @@ export default async function (req: Request, res: Response, next: Function) {
 
   try {
     const { userId, permissionId, active } = req.body;
+    const tokenUserId = req.user.id;
+
+    if (!(await userHasPermission(tokenUserId, PermissionsEnum.admin))) {
+      res.locals = {
+        error: true,
+        code: 403,
+        message: "forbidden",
+      };
+      next();
+      return;
+    }
 
     const newUserPermission: any = {};
 

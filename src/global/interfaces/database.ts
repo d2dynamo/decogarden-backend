@@ -70,6 +70,7 @@ export interface CouponDoc extends DefaultDoc {
   validTo: Date;
 }
 
+// Logs should never get updated hence no updatedAt
 export interface LogDoc {
   type: LogType;
   level: LogLevel;
@@ -78,8 +79,6 @@ export interface LogDoc {
   data: { [key: string]: any };
   createdAt: Date;
 }
-
-export type PermissionName = "basic" | "admin";
 
 export interface PermissionDoc extends DefaultDoc {
   name: string;

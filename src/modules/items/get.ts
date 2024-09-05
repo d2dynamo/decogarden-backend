@@ -1,7 +1,7 @@
-import type { ObjectId } from "mongodb";
 import connectCollection, { stringToObjectId } from "../database/mongo";
 import { UserError } from "../../util/error";
 import type { Item } from "./types";
+import type { ObjectId } from "mongodb";
 
 export default async function getItem(
   itemId: ObjectId | string

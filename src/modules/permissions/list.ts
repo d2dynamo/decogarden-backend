@@ -1,7 +1,7 @@
 import connectCollection from "../database/mongo";
 import type { ListPermission } from "./types";
 
-export default async function () {
+export default async function (): Promise<ListPermission[]> {
   const coll = await connectCollection("permissions");
 
   const cursor = coll.find({});

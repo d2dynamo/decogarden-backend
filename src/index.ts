@@ -1,8 +1,4 @@
-import express, {
-  type Application,
-  type Request,
-  type Response,
-} from "express";
+import express, { type Application } from "express";
 import "dotenv/config";
 import { createServer as https } from "https";
 import { createServer as http } from "http";
@@ -10,18 +6,14 @@ import { readFileSync } from "fs";
 import rateLimit from "express-rate-limit";
 import bodyParser from "body-parser";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 
 import cors from "./middlewares/cors";
 import passport from "./modules/passport";
 import { send } from "./modules/send";
 import { getGracey } from "./modules/gracey";
-import { generateToken, validateToken } from "./modules/token";
-import type { UserError } from "./util/error";
-
-//  ROUTERS
+import { generateToken } from "./modules/token";
 import auth from "./routes/auth";
-import hello from "./routes/hello";
-import item from "./routes/item";
 
 const gracey = getGracey();
 
@@ -29,7 +21,7 @@ let ServerShuttingDown = false;
 
 async function interruptSignalHandler(signal: string) {
   console.log(
-    `Received ${signal}, shutting down gracefully, pid: ${process.pid}`,
+    `Received ${signal}, shutting down gracefully, pid: ${process.pid}`
   );
 
   ServerShuttingDown = true;
@@ -123,7 +115,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true },
-  }),
+  })
 );
 
 app.use((req, res, next) => {
@@ -164,8 +156,15 @@ app.use((req, res, next) => {
 
 // ROUTES
 
+import hello from "./routes/hello";
+import item from "./routes/item";
+import permission from "./routes/permission";
+import userPermission from "./routes/userPermission";
+
 app.use("/hello", [hello, send]);
 app.use("/item", [item, send]);
+app.use("/permission", [permission, send]);
+app.use("/userPermission", [userPermission, send]);
 
 // not found
 app.use((req, res, next) => {
@@ -187,7 +186,7 @@ const httpsServer = https(
     key,
     cert,
   },
-  app,
+  app
 );
 const httpServer = http({}, app);
 

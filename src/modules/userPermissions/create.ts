@@ -1,24 +1,24 @@
-import type { ObjectId } from "mongodb";
-import getUser from "../users/get";
 import connectCollection from "../database/mongo";
-import type { AddUserPermission } from "./types";
+import type { SetUserPermission } from "./types";
+import getUser from "../users/get";
 
-export default async function addUserPermission(add: AddUserPermission) {
-  await getUser(add.userId);
+/** Use this as both create and update. */
+export default async function setUserPermission(set: SetUserPermission) {
+  await getUser(set.userId);
 
   const coll = await connectCollection("userPermissions");
 
   const result = await coll.updateOne(
     {
-      userId: add.userId,
-      permissionId: add.permissionId,
+      userId: set.userId,
+      permissionId: set.permissionId,
     },
     {
       $setOnInsert: {
         createdAt: new Date(),
       },
       $set: {
-        active: add.active ?? true,
+        active: set.active ?? true,
         updatedAt: new Date(),
       },
     },

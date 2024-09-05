@@ -19,7 +19,7 @@ export interface AddItem extends Omit<ItemDoc, Dates | "active"> {
 export interface UpdateItem extends Partial<Omit<ItemDoc, Dates>> {}
 
 export interface GetItem {
-  id: string;
+  id: ObjectId | string;
 }
 
 export interface ListItemFilter {

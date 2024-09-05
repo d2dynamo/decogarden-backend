@@ -1,4 +1,3 @@
-import createPermissionController from "./create";
-import listPermissionsController from "./list";
+import cListPermissions from "./list";
 
-export { createPermissionController, listPermissionsController };
+export { cListPermissions };
