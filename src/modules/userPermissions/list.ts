@@ -1,6 +1,7 @@
 import type { ObjectId } from "mongodb";
 import connectCollection, { stringToObjectId } from "../database/mongo";
 import type { ListUserPermission } from "./types";
+import { PermissionsEnumReverse } from "../../global/interfaces/permissions";
 
 export default async function listUserPermissions(
   userId: ObjectId | string
@@ -29,6 +30,7 @@ export default async function listUserPermissions(
     perms.push({
       id: item._id.toString(),
       permissionId: item.permissionId.toString(),
+      name: PermissionsEnumReverse[item.permissionId.toString()] || "unknown",
       active: item.active || false,
       createdAt: item.createdAt.getTime(),
       updatedAt: item.updatedAt.getTime(),

@@ -15,6 +15,8 @@ export default async function setUserPermission(set: SetUserPermission) {
     },
     {
       $setOnInsert: {
+        userId: set.userId,
+        permissionId: set.permissionId,
         createdAt: new Date(),
       },
       $set: {
@@ -27,7 +29,7 @@ export default async function setUserPermission(set: SetUserPermission) {
     }
   );
 
-  if (result.matchedCount && !result.upsertedCount) {
+  if (result.matchedCount && !result.upsertedCount && !result.modifiedCount) {
     throw new Error("failed to create permission");
   }
 

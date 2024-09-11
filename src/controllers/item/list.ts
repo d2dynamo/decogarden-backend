@@ -4,6 +4,8 @@ import type { ListItemFilter, ListItemSorts } from "../../modules/items/types";
 import type { ListOptions } from "../../global/interfaces/controller";
 import { dataValidator } from "../../modules/validator";
 import { listItems } from "../../modules/items";
+import userHasPermission from "../../modules/userPermissions/get";
+import { PermissionsEnum } from "../../global/interfaces/permissions";
 
 type ListItemsErrors = {
   [K in keyof ListItemFilter]?: string | object;
@@ -16,6 +18,17 @@ export default async function (req: Request, res: Response, next: Function) {
 
   try {
     const { title, priceGte, priceLte, page, pageSize, limit, sort } = req.body;
+    const userId = req.user.id;
+
+    if (!(await userHasPermission(userId, PermissionsEnum.customer))) {
+      res.locals = {
+        error: true,
+        code: 403,
+        message: "forbidden",
+      };
+      next();
+      return;
+    }
 
     const filter: ListItemFilter = {};
 

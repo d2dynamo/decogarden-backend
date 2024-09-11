@@ -41,8 +41,8 @@ if (process.env.NODE_ENV === "development") {
   (async () => {
     try {
       const at = await generateToken({
-        userId: "66a121cec326bfbd55a4c03f",
-        email: "info@dekosodas.lt",
+        userId: "66a656a9c326bfbd55a4e143",
+        email: "dev@decogarden.lt",
         expiration: "2h",
         type: "access_token",
       });

@@ -17,4 +17,6 @@ export interface SetUserPermission
 
 export interface ListUserPermissionFilter {}
 
-export interface ListUserPermission extends Omit<UserPermission, "userId"> {}
+export interface ListUserPermission extends Omit<UserPermission, "userId"> {
+  name: string;
+}

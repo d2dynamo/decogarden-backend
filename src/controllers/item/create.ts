@@ -3,6 +3,8 @@ import { UserError } from "../../util/error";
 import { addItem } from "../../modules/items";
 import { dataValidator } from "../../modules/validator";
 import type { AddItem } from "../../modules/items/types";
+import userHasPermission from "../../modules/userPermissions/get";
+import { PermissionsEnum } from "../../global/interfaces/permissions";
 
 type AddItemErrors = { [K in keyof AddItem]?: string | object };
 
@@ -12,8 +14,19 @@ export default async function (req: Request, res: Response, next: Function) {
   try {
     const { title, description, price, properties, amountStorage, active } =
       req.body;
+    const userId = req.user.id;
 
     const newItem: any = {};
+
+    if (!(await userHasPermission(userId, PermissionsEnum.inventory))) {
+      res.locals = {
+        error: true,
+        code: 403,
+        message: "forbidden",
+      };
+      next();
+      return;
+    }
 
     if (
       await dataValidator(title, "title", "string", errs, {

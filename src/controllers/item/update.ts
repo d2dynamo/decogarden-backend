@@ -4,6 +4,8 @@ import type { UpdateItem } from "../../modules/items/types";
 import { updateItem } from "../../modules/items";
 import { stringToObjectId } from "../../modules/database/mongo";
 import { dataValidator } from "../../modules/validator";
+import { PermissionsEnum } from "../../global/interfaces/permissions";
+import userHasPermission from "../../modules/userPermissions/get";
 
 type UpdateItemErrors = { [K in keyof UpdateItem]?: string | object } & {
   id?: string;
@@ -13,6 +15,17 @@ export default async function (req: Request, res: Response, next: Function) {
   try {
     const { id, title, description, price, properties, active, amountStorage } =
       req.body;
+    const userId = req.user.id;
+
+    if (!(await userHasPermission(userId, PermissionsEnum.inventory))) {
+      res.locals = {
+        error: true,
+        code: 403,
+        message: "forbidden",
+      };
+      next();
+      return;
+    }
 
     const errors: UpdateItemErrors = {};
 

@@ -8,10 +8,7 @@ export default async function (req: Request, res: Response, next: Function) {
   try {
     const tokenUserId = req.user.id;
 
-    if (
-      !tokenUserId ||
-      !(await userHasPermission(tokenUserId, PermissionsEnum.admin))
-    ) {
+    if (!(await userHasPermission(tokenUserId, PermissionsEnum.customer))) {
       res.locals = {
         error: true,
         code: 403,

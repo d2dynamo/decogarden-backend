@@ -24,7 +24,7 @@ export default async function getUser(id: ObjectId | string): Promise<User> {
   const result = await coll.findOne({ _id: userObjId });
 
   if (!result) {
-    throw (new UserError(`User with id: ${id} does not exist`), 404);
+    throw new UserError(`User with id: ${id} does not exist`, 404);
   }
 
   return {

@@ -29,19 +29,19 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "user id invalid",
+        message: "missing or invalid user id",
       };
       next();
       return;
     }
 
-    const userPermObjId = await stringToObjectId(id);
+    const userObjId = await stringToObjectId(id);
 
-    if (!userPermObjId) {
+    if (!userObjId) {
       res.locals = {
         error: true,
         code: 400,
-        message: "userPermission id invalid",
+        message: "user id invalid",
       };
       next();
       return;

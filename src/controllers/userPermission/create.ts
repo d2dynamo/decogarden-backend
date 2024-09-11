@@ -4,6 +4,8 @@ import type { SetUserPermission } from "../../modules/userPermissions/types";
 import { dataValidator } from "../../modules/validator";
 import userHasPermission from "../../modules/userPermissions/get";
 import { PermissionsEnum } from "../../global/interfaces/permissions";
+import setUserPermission from "../../modules/userPermissions/create";
+import { stringToObjectId } from "../../modules/database/mongo";
 
 type AddUserPermissionErrors = {
   [K in keyof SetUserPermission]?: string | object;
@@ -31,7 +33,12 @@ export default async function (req: Request, res: Response, next: Function) {
     if (
       await dataValidator(userId, "userId", "string", errs, { required: true })
     ) {
-      newUserPermission.userId = userId;
+      const uObjId = await stringToObjectId(userId);
+      if (!uObjId) {
+        errs.userId = "invalid userId";
+      }
+
+      newUserPermission.userId = uObjId;
     }
 
     if (
@@ -39,7 +46,12 @@ export default async function (req: Request, res: Response, next: Function) {
         required: true,
       })
     ) {
-      newUserPermission.permissionId = permissionId;
+      const pObjId = await stringToObjectId(permissionId);
+      if (!pObjId) {
+        errs.permissionId = "invalid permissionId";
+      }
+
+      newUserPermission.permissionId = pObjId;
     }
 
     if (await dataValidator(active, "active", "boolean", errs)) {
@@ -56,6 +68,20 @@ export default async function (req: Request, res: Response, next: Function) {
       next();
       return;
     }
+
+    await setUserPermission({
+      userId: newUserPermission.userId,
+      permissionId: newUserPermission.permissionId,
+      active: newUserPermission.active,
+    });
+
+    res.locals = {
+      error: false,
+      code: 200,
+      message: "success",
+      payload: {},
+    };
+    next();
   } catch (err) {
     if (err instanceof UserError) {
       res.locals = {

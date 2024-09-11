@@ -2,10 +2,23 @@ import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
 import { getItem } from "../../modules/items";
 import { stringToObjectId } from "../../modules/database/mongo";
+import userHasPermission from "../../modules/userPermissions/get";
+import { PermissionsEnum } from "../../global/interfaces/permissions";
 
 export default async function (req: Request, res: Response, next: Function) {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!(await userHasPermission(userId, PermissionsEnum.customer))) {
+      res.locals = {
+        error: true,
+        code: 403,
+        message: "forbidden",
+      };
+      next();
+      return;
+    }
 
     if (!id || typeof id !== "string") {
       res.locals = {
