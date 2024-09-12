@@ -20,5 +20,9 @@ declare namespace NodeJS {
     REDIS_URL?: string;
     REDIS_PASSWORD?: string;
     REDIS_PREFIX?: string;
+
+    // -- Sendgrid --
+    SENDGRID_API_KEY?: string;
+    SENDGRID_FROM_EMAIL?: string;
   }
 }

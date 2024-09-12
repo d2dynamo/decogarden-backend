@@ -39,6 +39,7 @@ export interface UserDoc extends DefaultDoc {
   email: string;
   hash: string;
   salt: string;
+  emailVerify: boolean;
   lastLoginAttempt: Date;
   lastLogin: Date;
 }

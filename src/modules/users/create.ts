@@ -17,6 +17,7 @@ export default async function createUser(email: string, password: string) {
       $setOnInsert: {
         email: email,
         hash: hash,
+        emailVerify: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -30,5 +31,17 @@ export default async function createUser(email: string, password: string) {
     throw new UserError(`email already used`);
   }
 
+  // create simple verify token
+  // store verify token in redis for 7 days
+  // send email verify
+
+  return true;
+}
+
+export async function resendVerifyEmail(email: string) {
+  // check if emailVerify false
+  // check if token exists in redis
+  // replace token if exists in redis
+  // send email verify
   return true;
 }

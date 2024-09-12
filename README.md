@@ -48,3 +48,7 @@ MONGO_CERT
 ## Payment
 
 ## Make it good, make it fast
+
+### Cleaner faster data validator
+
+### Custom router, replace express
