@@ -1,4 +1,13 @@
 import sgMail from "@sendgrid/mail";
+import type { TemplateDataMap } from "./templates";
+
+enum SendgridTemplates {
+  "verifyEmail" = "d-7c3ad0b0dbfe420eb28623ffe29ddc3e",
+}
+
+interface verifyEmailData {
+  verification_code: string;
+}
 
 class SgMailer {
   private static instance: SgMailer;
@@ -14,17 +23,18 @@ class SgMailer {
     return SgMailer.instance;
   }
 
-  public async sendTemplateEmail(
+  public async sendTemplateEmail<T extends keyof TemplateDataMap>(
     to: string,
     templateId: string,
-    dynamicData: object,
-    from = "noreply@durnehviir.com"
+    dynamicData?: TemplateDataMap[T],
+    from?: string
   ): Promise<void> {
     const msg = {
       to,
-      from,
+      from:
+        from ?? (process.env.SENDGRID_FROM_EMAIL || "noreply@durnehviir.com"),
       templateId,
-      dynamicTemplateData: dynamicData,
+      dynamicTemplateData: dynamicData || {},
     };
 
     try {

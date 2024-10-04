@@ -1,5 +1,9 @@
 import { UserError } from "../../util/error";
+import generateSimpleToken from "../../util/simpleToken";
 import connectCollection from "../database/mongo";
+import { redisClient } from "../database/redis";
+import SgMailer from "../mailer";
+import { SendgridTemplates } from "../mailer/templates";
 
 // TODO: email verification
 export default async function createUser(email: string, password: string) {
@@ -28,20 +32,19 @@ export default async function createUser(email: string, password: string) {
   );
 
   if (!result.upsertedId) {
-    throw new UserError(`email already used`);
+    throw new UserError(`email already used`, 409);
   }
 
-  // create simple verify token
-  // store verify token in redis for 7 days
-  // send email verify
+  const redis = await redisClient();
 
-  return true;
-}
+  const verifyToken = generateSimpleToken();
 
-export async function resendVerifyEmail(email: string) {
-  // check if emailVerify false
-  // check if token exists in redis
-  // replace token if exists in redis
-  // send email verify
+  await redis.set(`verify:${verifyToken}`, email, "EX", 60 * 60 * 24 * 1);
+
+  const sgMailer = SgMailer.getInstance();
+  await sgMailer.sendTemplateEmail(email, SendgridTemplates.verifyEmail, {
+    verification_code: verifyToken,
+  });
+
   return true;
 }
