@@ -5,8 +5,17 @@ import { redisClient } from "../database/redis";
 import SgMailer from "../mailer";
 import { SendgridTemplates } from "../mailer/templates";
 
-// TODO: email verification
-export default async function createUser(email: string, password: string) {
+interface CreateUserOpts {
+  email?: string;
+  phone?: string;
+  auth?: boolean;
+}
+
+export default async function createUser(
+  userName: string,
+  password: string,
+  opts: CreateUserOpts
+) {
   const coll = await connectCollection("users");
 
   const hash = await Bun.password.hash(password, {
@@ -15,16 +24,53 @@ export default async function createUser(email: string, password: string) {
     memoryCost: 3,
   });
 
+  const set = {
+    userName: userName,
+    hash: hash,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const redis = await redisClient();
+
+  if (opts.email) {
+    set["email"] = opts.email;
+    set["emailVerified"] = false;
+
+    const verifyToken = generateSimpleToken();
+
+    await redis.set(
+      `verify:${verifyToken}`,
+      opts.email,
+      "EX",
+      60 * 60 * 24 * 1
+    );
+
+    const sgMailer = SgMailer.getInstance();
+    await sgMailer.sendTemplateEmail(
+      opts.email,
+      SendgridTemplates.verifyEmail,
+      {
+        verification_code: verifyToken,
+      }
+    );
+  }
+
+  if (opts.phone) {
+    set["phone"] = opts.phone;
+    set["phoneVerified"] = false;
+
+    // when twilio set up add phone nr verification
+  }
+
+  if (opts.auth) {
+    set["auth"] = opts.auth;
+  }
+
   const result = await coll.updateOne(
-    { email: email },
+    { userName: userName },
     {
-      $setOnInsert: {
-        email: email,
-        hash: hash,
-        emailVerify: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      $setOnInsert: set,
     },
     {
       upsert: true,
@@ -34,17 +80,6 @@ export default async function createUser(email: string, password: string) {
   if (!result.upsertedId) {
     throw new UserError(`email already used`, 409);
   }
-
-  const redis = await redisClient();
-
-  const verifyToken = generateSimpleToken();
-
-  await redis.set(`verify:${verifyToken}`, email, "EX", 60 * 60 * 24 * 1);
-
-  const sgMailer = SgMailer.getInstance();
-  await sgMailer.sendTemplateEmail(email, SendgridTemplates.verifyEmail, {
-    verification_code: verifyToken,
-  });
 
   return true;
 }

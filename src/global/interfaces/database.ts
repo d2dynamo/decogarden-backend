@@ -36,10 +36,14 @@ export type CollectionDocs = {
 export type DekoCollections = keyof CollectionDocs;
 
 export interface UserDoc extends DefaultDoc {
+  userName: string;
   email: string;
+  phone?: string;
+  auth?: boolean; // authenticator app
   hash: string;
   salt: string;
   emailVerify: boolean;
+  phoneVerify?: boolean;
   lastLoginAttempt: Date;
   lastLogin: Date;
 }
