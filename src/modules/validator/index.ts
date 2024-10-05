@@ -2,6 +2,7 @@ export type ErrorsDesc = { [key: string]: string | object };
 
 export interface ValidateOptions {
   required?: boolean;
+  errorMsg?: string;
 }
 
 export interface NumberValidateOpts extends ValidateOptions {
@@ -34,6 +35,8 @@ export interface ObjectValidateOpts extends ValidateOptions {
   maxProps?: number;
 }
 
+export interface PhoneNumberValidateOpts extends ValidateOptions {}
+
 export interface SortValidateOpts extends ValidateOptions {}
 
 export type ExpectType =
@@ -42,7 +45,8 @@ export type ExpectType =
   | "object"
   | "array"
   | "boolean"
-  | "sort";
+  | "sort"
+  | "phoneNumber";
 
 export type ValidatorOptions<T extends ExpectType> = T extends "number"
   ? NumberValidateOpts
@@ -52,6 +56,8 @@ export type ValidatorOptions<T extends ExpectType> = T extends "number"
   ? ArrayValidateOpts
   : T extends "object"
   ? ObjectValidateOpts
+  : T extends "phoneNumber"
+  ? PhoneNumberValidateOpts
   : ValidateOptions;
 
 import numberValidator from "./number";
@@ -73,6 +79,8 @@ type returnType<T> = T extends "number"
   ? object | false
   : T extends "sort"
   ? object | false
+  : T extends "phoneNumber"
+  ? string | false
   : false;
 
 /**
@@ -82,7 +90,7 @@ type returnType<T> = T extends "number"
  * @param expect expected type of variable
  * @param errs errs object. If val is not undefined but is incorrect type, will store error message here.
  * @param options
- * @returns false if val is not of expected type or is undefined. val otherwise.
+ * @returns false if val is not of expected type or is undefined and required. val otherwise.
  */
 export async function dataValidator<ET extends ExpectType>(
   val: any,

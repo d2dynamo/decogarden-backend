@@ -1,5 +1,5 @@
 import { UserError } from "../../util/error";
-import generateSimpleToken from "../../util/simpleToken";
+import genSimpleKey from "../../util/simpleToken";
 import connectCollection from "../database/mongo";
 import { redisClient } from "../database/redis";
 import SgMailer from "../mailer";
@@ -37,7 +37,7 @@ export default async function createUser(
     set["email"] = opts.email;
     set["emailVerified"] = false;
 
-    const verifyToken = generateSimpleToken();
+    const verifyToken = genSimpleKey();
 
     await redis.set(
       `verify:${verifyToken}`,

@@ -39,7 +39,7 @@ export interface UserDoc extends DefaultDoc {
   userName: string;
   email: string;
   phone?: string;
-  auth?: boolean; // authenticator app
+  authSecret?: string;
   hash: string;
   salt: string;
   emailVerify: boolean;

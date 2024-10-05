@@ -1,4 +1,6 @@
 import type { SortOption } from "../../global/interfaces/controller";
+import { Dates } from "../../global/interfaces/database";
+import { UserDoc } from "../../global/interfaces/database";
 
 export interface User extends Omit<UserDoc, Dates> {
   id: string;
@@ -6,7 +8,7 @@ export interface User extends Omit<UserDoc, Dates> {
   updatedAt: number;
 }
 
-export interface SetUser extends Omit<UserDoc, Dates | "auth"> {
+export interface SetUser extends Omit<UserDoc, Dates | "authSecret"> {
   password: string;
 }
 

@@ -118,5 +118,5 @@ export function base32Decode(
     }
   }
 
-  return output.buffer;
+  return output.buffer as ArrayBuffer;
 }

@@ -1,5 +1,5 @@
 import { UserError } from "../../util/error";
-import generateSimpleToken from "../../util/simpleToken";
+import genSimpleKey from "../../util/simpleToken";
 import connectCollection from "../database/mongo";
 import { redisClient } from "../database/redis";
 import SgMailer from "../mailer";
@@ -49,7 +49,7 @@ export async function resendVerifyEmail(email: string) {
 
   const redis = await redisClient();
 
-  const verifyToken = generateSimpleToken();
+  const verifyToken = genSimpleKey();
 
   await redis.set(`verify:${verifyToken}`, email, "EX", 60 * 60 * 24 * 1);
 

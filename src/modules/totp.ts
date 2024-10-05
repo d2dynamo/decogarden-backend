@@ -46,7 +46,7 @@ const hotp = async (secret: any, counter: any) => {
   // return 6 digits, padded with leading zeros
   return num.toString().padStart(6, "0").slice(-6);
 };
-// allow for 1 minute window
+
 export const totp = async (
   secret: any,
   windowBack: number,
@@ -66,6 +66,12 @@ export const totp = async (
 
 export const generateBase32Secret = () => {
   const randomBytes = crypto.randomBytes(10);
-  const secret = base32Encode(randomBytes);
+
+  const arrayBuffer = randomBytes.buffer.slice(
+    randomBytes.byteOffset,
+    randomBytes.byteOffset + randomBytes.byteLength
+  ) as ArrayBuffer;
+
+  const secret = base32Encode(arrayBuffer);
   return secret;
 };
