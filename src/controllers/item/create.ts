@@ -103,15 +103,10 @@ export default async function (req: Request, res: Response, next: Function) {
       error: false,
       code: 200,
       message: "success",
-      payload:
-        Object.keys(errs).length > 0
-          ? {
-              insertedId: insId,
-              errors: errs,
-            }
-          : {
-              insertedId: insId,
-            },
+      payload: {
+        insertedId: insId,
+        errors: errs,
+      },
     };
     next();
   } catch (err) {
@@ -120,12 +115,9 @@ export default async function (req: Request, res: Response, next: Function) {
         error: true,
         code: err.code || 400,
         message: err.message || "unknown client error",
-        payload:
-          Object.keys(errs).length > 0
-            ? {
-                errors: errs,
-              }
-            : {},
+        payload: {
+          errors: errs,
+        },
       };
       next();
       return;
@@ -137,12 +129,9 @@ export default async function (req: Request, res: Response, next: Function) {
       error: true,
       code: 500,
       message: "internal server error",
-      payload:
-        Object.keys(errs).length > 0
-          ? {
-              errors: errs,
-            }
-          : {},
+      payload: {
+        errors: errs,
+      },
     };
     next();
   }

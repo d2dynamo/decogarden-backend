@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
 import type { SetUser } from "../../modules/users/types";
 import { dataValidator } from "../../modules/validator";
+import createUser from "../../modules/users/create";
 
 type AddUserErrors = {
   [K in keyof SetUser]?: string | object;
@@ -52,6 +53,26 @@ export default async function (req: Request, res: Response, next: Function) {
     ) {
       newUser.phone = phone;
     }
+
+    if (errs.userName || errs.password || errs.email) {
+      res.locals = {
+        error: true,
+        code: 400,
+        message: "invalid user data",
+        payload: {
+          errors: errs,
+        },
+      };
+    }
+
+    await createUser(userName, password, { email, phone });
+
+    res.locals = {
+      error: false,
+      code: 200,
+      message: "user created",
+      payload: { errors: errs },
+    };
   } catch (err) {
     if (err instanceof UserError) {
       res.locals = {

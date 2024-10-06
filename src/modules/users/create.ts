@@ -18,6 +18,11 @@ export default async function createUser(
 ) {
   const coll = await connectCollection("users");
 
+  if (!opts.email) {
+    // setup twilio and require phone
+    throw new UserError(`email required`, 400);
+  }
+
   const hash = await Bun.password.hash(password, {
     algorithm: "argon2id",
     timeCost: 2,

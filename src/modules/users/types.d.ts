@@ -17,13 +17,11 @@ export interface ListUserFilter {
   email?: string;
   emailVerified?: boolean;
   phoneVerified?: boolean;
-  createdAtGte?: number;
-  createdAtLte?: number;
 }
 
 export interface ListUserSorts extends SortOption {
-  title: 1 | -1;
-  price: 1 | -1;
+  userName: 1 | -1;
+  email: 1 | -1;
   createdAt: 1 | -1;
   updatedAt: 1 | -1;
 }
