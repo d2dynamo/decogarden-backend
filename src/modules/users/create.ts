@@ -8,7 +8,6 @@ import { SendgridTemplates } from "../mailer/templates";
 interface CreateUserOpts {
   email?: string;
   phone?: string;
-  auth?: boolean;
 }
 
 export default async function createUser(
@@ -30,36 +29,25 @@ export default async function createUser(
   });
 
   const set = {
+    email: opts.email,
     userName: userName,
     hash: hash,
+    emailVerify: false,
+    ttl: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   const redis = await redisClient();
 
-  if (opts.email) {
-    set["email"] = opts.email;
-    set["emailVerified"] = false;
+  const verifyToken = genSimpleKey();
 
-    const verifyToken = genSimpleKey();
+  await redis.set(`verify:${verifyToken}`, opts.email, "EX", 60 * 60 * 24 * 1);
 
-    await redis.set(
-      `verify:${verifyToken}`,
-      opts.email,
-      "EX",
-      60 * 60 * 24 * 1
-    );
-
-    const sgMailer = SgMailer.getInstance();
-    await sgMailer.sendTemplateEmail(
-      opts.email,
-      SendgridTemplates.verifyEmail,
-      {
-        verification_code: verifyToken,
-      }
-    );
-  }
+  const sgMailer = SgMailer.getInstance();
+  await sgMailer.sendTemplateEmail(opts.email, SendgridTemplates.verifyEmail, {
+    verification_code: verifyToken,
+  });
 
   if (opts.phone) {
     set["phone"] = opts.phone;
@@ -68,22 +56,10 @@ export default async function createUser(
     // when twilio set up add phone nr verification
   }
 
-  if (opts.auth) {
-    set["auth"] = opts.auth;
-  }
+  const result = await coll.insertOne(set);
 
-  const result = await coll.updateOne(
-    { userName: userName },
-    {
-      $setOnInsert: set,
-    },
-    {
-      upsert: true,
-    }
-  );
-
-  if (!result.upsertedId) {
-    throw new UserError(`email already used`, 409);
+  if (!result.insertedId) {
+    throw new UserError(`email or username already used`, 409);
   }
 
   return true;

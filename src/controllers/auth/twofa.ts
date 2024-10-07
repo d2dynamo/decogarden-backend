@@ -1,19 +1,22 @@
 import type { Request, Response } from "express";
 import { UserError } from "../../util/error";
-import userHasPermission from "../../modules/userPermissions/get";
-import getUser from "../../modules/users/get";
+import { verify2fa } from "../../modules/users/authenticator";
 
-export default async function (req: Request, res: Response, next: Function) {
+export default async function cValidate2fa(
+  req: Request,
+  res: Response,
+  next: Function
+) {
   const errs = {};
   try {
     const userId = req.user.id;
-    const { id } = req.params;
+    const { code } = req.body;
 
-    if (!id) {
+    if (!code) {
       res.locals = {
         error: true,
         code: 400,
-        message: "missing id",
+        message: "missing 2fa code",
         payload: {
           errors: errs,
         },
@@ -22,20 +25,7 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    if (userId !== id && !(await userHasPermission(userId, "admin"))) {
-      res.locals = {
-        error: true,
-        code: 403,
-        message: "forbidden",
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
-
-    const user = await getUser(id);
+    await verify2fa(userId, code);
 
     res.locals = {
       error: false,
@@ -43,7 +33,6 @@ export default async function (req: Request, res: Response, next: Function) {
       message: "success",
       payload: {
         errors: errs,
-        user,
       },
     };
     next();
@@ -61,7 +50,7 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("controller:", err);
+    console.log("controller validate2fa:", err);
 
     res.locals = {
       error: true,

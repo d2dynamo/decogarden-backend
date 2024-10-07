@@ -41,11 +41,11 @@ export interface UserDoc extends DefaultDoc {
   phone?: string;
   authSecret?: string;
   hash: string;
-  salt: string;
   emailVerify: boolean;
   phoneVerify?: boolean;
-  lastLoginAttempt: Date;
-  lastLogin: Date;
+  ttl?: Date; // time to live on user creation, 1 day until verified.
+  lastLoginAttempt?: Date;
+  lastLogin?: Date;
 }
 
 export interface ItemDoc extends DefaultDoc {

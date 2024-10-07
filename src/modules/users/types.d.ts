@@ -15,8 +15,6 @@ export interface SetUser extends Omit<UserDoc, Dates | "authSecret"> {
 export interface ListUserFilter {
   userName?: string;
   email?: string;
-  emailVerified?: boolean;
-  phoneVerified?: boolean;
 }
 
 export interface ListUserSorts extends SortOption {

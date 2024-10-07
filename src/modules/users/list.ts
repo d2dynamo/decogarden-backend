@@ -31,7 +31,6 @@ export default async function listUsers(
     _id: 1,
     userName: 1,
     email: 1,
-    phone: 1,
   };
 
   const page = listOpts?.page || 1;
@@ -56,7 +55,6 @@ export default async function listUsers(
       id: doc._id,
       userName: doc.userName,
       email: doc.email,
-      phone: doc.phone,
     });
   }
 

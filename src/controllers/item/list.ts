@@ -82,7 +82,7 @@ export default async function (req: Request, res: Response, next: Function) {
       message: "success",
       payload: {
         items: listResult,
-        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        errors: errors,
       },
     };
     next();

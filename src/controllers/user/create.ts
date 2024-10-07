@@ -79,12 +79,9 @@ export default async function (req: Request, res: Response, next: Function) {
         error: true,
         code: err.code || 400,
         message: err.message || "unknown client error",
-        payload:
-          Object.keys(errs).length > 0
-            ? {
-                errors: errs,
-              }
-            : {},
+        payload: {
+          errors: errs,
+        },
       };
       next();
       return;
@@ -96,12 +93,9 @@ export default async function (req: Request, res: Response, next: Function) {
       error: true,
       code: 500,
       message: "internal server error",
-      payload:
-        Object.keys(errs).length > 0
-          ? {
-              errors: errs,
-            }
-          : {},
+      payload: {
+        errors: errs,
+      },
     };
     next();
   }

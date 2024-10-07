@@ -5,31 +5,44 @@ import { redisClient } from "../database/redis";
 import SgMailer from "../mailer";
 import { SendgridTemplates } from "../mailer/templates";
 
-export default async function verifyEmail(token: string): Promise<boolean> {
+export default async function verifyUser(
+  token: string,
+  byEmail = false,
+  byPhone = false
+): Promise<boolean> {
   const redis = await redisClient();
 
-  const email = await redis.get(`verify:${token}`);
-  if (!email) {
-    throw new UserError("Token expired", 400);
-  }
-
-  const coll = await connectCollection("users");
-
-  const result = await coll.updateOne(
-    { email: email },
-    {
-      $set: {
-        emailVerify: true,
-        updatedAt: new Date(),
-      },
+  if (byEmail) {
+    const email = await redis.get(`verify:${token}`);
+    if (!email) {
+      throw new UserError("Token expired", 400);
     }
-  );
 
-  if (!result.matchedCount) {
-    throw new UserError("User not found", 404);
+    const coll = await connectCollection("users");
+
+    const result = await coll.updateOne(
+      { email: email },
+      {
+        $set: {
+          emailVerify: true,
+          updatedAt: new Date(),
+        },
+        $unset: {
+          ttl: "",
+        },
+      }
+    );
+
+    if (!result.matchedCount) {
+      throw new UserError("User not found", 404);
+    }
+
+    await redis.del(`verify:${token}`);
   }
 
-  await redis.del(`verify:${token}`);
+  if (byPhone) {
+    // when twilio set up. todo
+  }
 
   return true;
 }
