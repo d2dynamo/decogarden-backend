@@ -12,7 +12,7 @@ import cors from "./middlewares/cors";
 import passport from "./modules/passport";
 import { send } from "./modules/send";
 import { getGracey } from "./modules/gracey";
-import { generateToken } from "./modules/token";
+import { generateToken, validateToken } from "./modules/token";
 import auth from "./routes/auth";
 
 const gracey = getGracey();
@@ -160,11 +160,14 @@ import hello from "./routes/hello";
 import item from "./routes/item";
 import permission from "./routes/permission";
 import userPermission from "./routes/userPermission";
+import user from "./routes/user";
+import { redisClient } from "./modules/database/redis";
 
 app.use("/hello", [hello, send]);
 app.use("/item", [item, send]);
 app.use("/permission", [permission, send]);
 app.use("/userPermission", [userPermission, send]);
+app.use("/user", [user, send]);
 
 // not found
 app.use((req, res, next) => {

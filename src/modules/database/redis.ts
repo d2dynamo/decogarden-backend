@@ -7,7 +7,8 @@ export async function redisClient() {
   if (
     !process.env.REDIS_PASSWORD ||
     !process.env.REDIS_PREFIX ||
-    !process.env.REDIS_URL
+    !process.env.REDIS_HOST ||
+    !process.env.REDIS_PORT
   ) {
     throw new Error("Redis enviroment are not set");
   }
@@ -15,7 +16,8 @@ export async function redisClient() {
   if (client) return client;
 
   client = new Redis({
-    host: process.env.REDIS_URL,
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || "6379"),
     password: process.env.REDIS_PASSWORD,
     keyPrefix: `${RedisPrefix}:`,
   });

@@ -73,6 +73,7 @@ export default async function (req: Request, res: Response, next: Function) {
       message: "user created",
       payload: { errors: errs },
     };
+    next();
   } catch (err) {
     if (err instanceof UserError) {
       res.locals = {

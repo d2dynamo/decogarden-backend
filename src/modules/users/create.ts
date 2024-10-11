@@ -15,11 +15,19 @@ export default async function createUser(
   password: string,
   opts: CreateUserOpts
 ) {
-  const coll = await connectCollection("users");
-
   if (!opts.email) {
     // setup twilio and require phone
     throw new UserError(`email required`, 400);
+  }
+
+  const coll = await connectCollection("users");
+
+  const checkUsed = await coll.findOne({
+    $or: [{ email: opts.email }, { userName: userName }],
+  });
+
+  if (checkUsed) {
+    throw new UserError(`email or username already used`, 409);
   }
 
   const hash = await Bun.password.hash(password, {
@@ -59,7 +67,7 @@ export default async function createUser(
   const result = await coll.insertOne(set);
 
   if (!result.insertedId) {
-    throw new UserError(`email or username already used`, 409);
+    throw new Error("failed to create user");
   }
 
   return true;
