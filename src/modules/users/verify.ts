@@ -12,13 +12,13 @@ export default async function verifyUser(
 ): Promise<boolean> {
   const redis = await redisClient();
 
+  const coll = await connectCollection("users");
+
   if (byEmail) {
     const email = await redis.get(`verify:${token}`);
     if (!email) {
       throw new UserError("Token expired", 400);
     }
-
-    const coll = await connectCollection("users");
 
     const result = await coll.updateOne(
       { email: email },

@@ -33,10 +33,6 @@ MONGO_CERT
 
 # TODO
 
-## User permissions
-
-## User email verify
-
 ## Better tokens?
 
 ## Logging
