@@ -33,8 +33,6 @@ MONGO_CERT
 
 # TODO
 
-## Better tokens?
-
 ## Logging
 
 ## Orders and shipments

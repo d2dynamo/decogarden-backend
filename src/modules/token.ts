@@ -6,39 +6,38 @@ const JWT_ALG = "RS256";
 const JWT_AUD = "dekosodasbackend";
 const JWT_ISS = "dekosodas";
 
-async function getPrivateKey(): Promise<string> {
-  const path = process.env.JWT_PRIVATE_KEY_PATH;
+let cachedPrivateKey: string | null = null;
+let cachedPublicKey: string | null = null;
 
-  if (!path) {
-    throw new Error("JWT_PRIVATE_KEY_PATH is not set");
-  }
+async function getPrivateKey(): Promise<string> {
+  if (cachedPrivateKey) return cachedPrivateKey;
+
+  const path = process.env.JWT_PRIVATE_KEY_PATH;
+  if (!path) throw new Error("JWT_PRIVATE_KEY_PATH is not set");
 
   const keyBuffer = await readFile(path);
   const key = keyBuffer.toString("utf-8");
+  if (!key) throw new Error("Private Key is empty");
 
-  if (!key) {
-    throw new Error("Private Key is empty");
-  }
-
+  cachedPrivateKey = key;
   return key;
 }
 
 async function getPublicKey(): Promise<string> {
-  const path = process.env.JWT_PUBLIC_KEY_PATH;
+  if (cachedPublicKey) return cachedPublicKey;
 
-  if (!path) {
-    throw new Error("JWT_PUBLIC_KEY_PATH is not set");
-  }
+  const path = process.env.JWT_PUBLIC_KEY_PATH;
+  if (!path) throw new Error("JWT_PUBLIC_KEY_PATH is not set");
 
   const keyBuffer = await readFile(path);
   const key = keyBuffer.toString("utf-8");
+  if (!key) throw new Error("Public Key is empty");
 
-  if (!key) {
-    throw new Error("Public Key is empty");
-  }
-
+  cachedPublicKey = key;
   return key;
 }
+
+export type TokenType = "access_token" | "refresh_token";
 
 export type ExpirationString = `${number}${
   | "s"
@@ -48,7 +47,6 @@ export type ExpirationString = `${number}${
   | "w"
   | "M"
   | "y"}`;
-export type TokenType = "access_token" | "refresh_token";
 
 interface TokenOpts {
   userId: ObjectId | string;
@@ -126,6 +124,7 @@ export async function validateToken(
         jwt: null,
       };
     } else {
+      console.log("unexpected validateToken error: ", err);
       throw err;
     }
   }
