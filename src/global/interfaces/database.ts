@@ -1,4 +1,5 @@
 import type { ObjectId } from "mongodb";
+import type { LogLevel, LogType } from "../../modules/logger/types";
 
 type PaymentMethod = "stripe" | "paysera" | "transfer";
 type OrderStatus =
@@ -7,8 +8,6 @@ type OrderStatus =
   | "cancelled"
   | "delivering"
   | "completed";
-type LogType = "ERROR" | "INFO" | "WARN";
-type LogLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 interface DefaultDoc {
   createdAt: Date;
@@ -30,6 +29,7 @@ export type CollectionDocs = {
   coupons: CouponDoc;
   permissions: PermissionDoc;
   userPermissions: UserPermissionDoc;
+  logs: LogDoc;
 };
 
 /** Available collections in bonkbot database */

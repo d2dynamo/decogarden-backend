@@ -27,5 +27,8 @@ declare namespace NodeJS {
     SENDGRID_SMTP_USER?: string;
     SENDGRID_API_KEY?: string;
     SENDGRID_FROM_EMAIL?: string;
+
+    // -- Logging --
+    CONSOLE_LOG?: string;
   }
 }
