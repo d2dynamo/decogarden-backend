@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, mock } from "bun:test";
 import { Request, Response } from "express";
 import { updateItemController } from "../src/controllers/item";
-import { addItem } from "../src/modules/items/create";
+import addItem from "../src/modules/items/create";
 
 const validItem = {
   title: "Item Title",

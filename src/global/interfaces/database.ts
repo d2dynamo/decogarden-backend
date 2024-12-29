@@ -40,7 +40,7 @@ export interface UserDoc extends DefaultDoc {
   email: string;
   phone?: string;
   authSecret?: string;
-  hash: string;
+  hash?: string;
   emailVerify: boolean;
   phoneVerify?: boolean;
   ttl?: Date; // time to live on user creation, 1 day until verified.

@@ -12,7 +12,6 @@ interface CreateUserOpts {
 
 export default async function createUser(
   userName: string,
-  password: string,
   opts: CreateUserOpts
 ) {
   if (!opts.email) {
@@ -30,16 +29,9 @@ export default async function createUser(
     throw new UserError(`email or username already used`, 409);
   }
 
-  const hash = await Bun.password.hash(password, {
-    algorithm: "argon2id",
-    timeCost: 2,
-    memoryCost: 3,
-  });
-
   const set = {
     email: opts.email,
     userName: userName,
-    hash: hash,
     emailVerify: false,
     ttl: new Date(),
     createdAt: new Date(),

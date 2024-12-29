@@ -65,7 +65,7 @@ export default async function (req: Request, res: Response, next: Function) {
       };
     }
 
-    await createUser(userName, password, { email, phone });
+    await createUser(userName, { email, phone });
 
     res.locals = {
       error: false,

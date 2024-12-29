@@ -7,6 +7,7 @@ import { SendgridTemplates } from "../mailer/templates";
 
 export default async function verifyUser(
   token: string,
+  password: string,
   byEmail = false,
   byPhone = false
 ): Promise<boolean> {
@@ -36,6 +37,21 @@ export default async function verifyUser(
     if (!result.matchedCount) {
       throw new UserError("User not found", 404);
     }
+
+    const hash = await Bun.password.hash(password, {
+      algorithm: "argon2id",
+      timeCost: 2,
+      memoryCost: 65536,
+    });
+
+    await coll.updateOne(
+      { email: email },
+      {
+        $set: {
+          password: hash,
+        },
+      }
+    );
 
     await redis.del(`verify:${token}`);
   }

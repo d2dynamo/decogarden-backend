@@ -39,7 +39,6 @@ class SgMailer {
 
     try {
       await sgMail.send(msg);
-      console.log(`Email sent to ${to}`);
     } catch (error: any) {
       console.log("Error sending email:", error.response?.body || error);
       throw new Error("Failed to send email");

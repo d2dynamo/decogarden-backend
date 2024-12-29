@@ -1,13 +1,23 @@
 import type { Request, Response } from "express";
 
 export async function send(req: Request, res: Response) {
+  if (res.locals.payload?.refreshToken) {
+    res.cookie("RefreshToken", res.locals.payload.refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    delete res.locals.payload.refreshToken;
+  }
+
   if (res.locals.redirect) {
     let url = "";
 
     url = `${res.locals.redirect}?error=${res.locals.error}&message=${res.locals.message}`;
 
     if (res.locals.payload.accessToken && res.locals.payload.refreshToken) {
-      url = `${res.locals.redirect}?accessToken=${res.locals.payload.accessToken}&refreshToken=${res.locals.payload.refreshToken}`;
+      url = `${res.locals.redirect}?accessToken=${res.locals.payload.accessToken}`;
+      delete res.locals.payload.accessToken;
     }
 
     res.redirect(url);

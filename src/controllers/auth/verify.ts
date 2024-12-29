@@ -10,7 +10,7 @@ export async function cVerifyEmail(
   const errs = {};
 
   try {
-    const { code } = req.body;
+    const { code, password } = req.body;
 
     if (!code) {
       res.locals = {
@@ -25,7 +25,7 @@ export async function cVerifyEmail(
       return;
     }
 
-    await verifyUser(code, true, false);
+    await verifyUser(code, password, true, false);
 
     res.locals = {
       error: false,
@@ -86,7 +86,7 @@ export async function cVerifyPhone(
       return;
     }
 
-    await verifyUser(code, false, true);
+    await verifyUser(code, "", false, true);
 
     res.locals = {
       error: false,

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import { Request, Response } from "express";
 import { getItemController } from "../src/controllers/item";
-import { addItem } from "../src/modules/items/create";
+import addItem from "../src/modules/items/create";
 
 let validItemId = "";
 

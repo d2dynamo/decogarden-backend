@@ -6,7 +6,7 @@ import connectCollection from "../database/mongo";
  * @param newItem {AddItem}
  * @returns inserted item id
  */
-export default async function addItem(newItem: AddItem): Promise<string> {
+async function addItem(newItem: AddItem): Promise<string> {
   const coll = await connectCollection("items");
 
   const insertDoc = {
@@ -25,3 +25,5 @@ export default async function addItem(newItem: AddItem): Promise<string> {
 
   return result.insertedId.toString();
 }
+
+export default addItem;
