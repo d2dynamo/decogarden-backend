@@ -1,7 +1,8 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import userHasPermission from "../../modules/userPermissions/get";
-import getUser from "../../modules/users/get";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import userHasPermission from '../../modules/userPermissions/get';
+import getUser from '../../modules/users/get';
+import logger from '../../modules/logger';
 
 export default async function (req: Request, res: Response, next: Function) {
   const errs = {};
@@ -13,7 +14,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "missing id",
+        message: 'missing id',
         payload: {
           errors: errs,
         },
@@ -22,11 +23,11 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    if (userId !== id && !(await userHasPermission(userId, "admin"))) {
+    if (userId !== id && !(await userHasPermission(userId, 'admin'))) {
       res.locals = {
         error: true,
         code: 403,
-        message: "forbidden",
+        message: 'forbidden',
         payload: {
           errors: errs,
         },
@@ -40,7 +41,7 @@ export default async function (req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         errors: errs,
         user,
@@ -52,7 +53,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -61,12 +62,17 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("controller:", err);
+    logger.error(5, 'failed to get user', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },

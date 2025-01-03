@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
+import type { Request, Response } from 'express';
 
-import { UserError } from "../../util/error";
+import { UserError } from '../../util/error';
+import logger from '../../modules/logger';
 
 export default async function getHello(
   req: Request,
@@ -10,10 +11,10 @@ export default async function getHello(
   try {
     const secret = req.body.secret;
 
-    if (secret == "big") {
+    if (secret == 'big') {
       res.locals = {
         error: false,
-        message: "big if true",
+        message: 'big if true',
         code: 200,
         payload: {},
       };
@@ -23,10 +24,10 @@ export default async function getHello(
 
     res.locals = {
       error: false,
-      message: "hello world",
+      message: 'hello world',
       code: 200,
       payload: {
-        data: "Hi!",
+        data: 'Hi!',
       },
     };
     next();
@@ -42,10 +43,16 @@ export default async function getHello(
       return;
     }
 
-    console.log(err);
+    logger.error(1, 'getHello controller:', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
+
     res.locals = {
       error: true,
-      message: "internal server error",
+      message: 'internal server error',
       code: 500,
       payload: {},
     };

@@ -1,11 +1,12 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import type { ListUserFilter, ListUserSorts } from "../../modules/users/types";
-import userHasPermission from "../../modules/userPermissions/get";
-import { PermissionsEnum } from "../../global/interfaces/permissions";
-import { dataValidator } from "../../modules/validator";
-import type { ListOptions } from "../../global/interfaces/controller";
-import listUsers from "../../modules/users/list";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import type { ListUserFilter, ListUserSorts } from '../../modules/users/types';
+import userHasPermission from '../../modules/userPermissions/get';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
+import { dataValidator } from '../../modules/validator';
+import type { ListOptions } from '../../global/interfaces/controller';
+import listUsers from '../../modules/users/list';
+import logger from '../../modules/logger';
 
 type ListUserErrors = { [K in keyof ListUserFilter]?: string | object } & {
   [K in keyof ListOptions<ListUserSorts>]?: string | object;
@@ -21,7 +22,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 403,
-        message: "forbidden",
+        message: 'forbidden',
         payload: {
           errors: errs,
         },
@@ -33,7 +34,7 @@ export default async function (req: Request, res: Response, next: Function) {
     const filter: ListUserFilter = {};
 
     if (
-      await dataValidator(userName, "userName", "string", errs, {
+      await dataValidator(userName, 'userName', 'string', errs, {
         minLength: 1,
         maxLength: 50,
       })
@@ -42,7 +43,7 @@ export default async function (req: Request, res: Response, next: Function) {
     }
 
     if (
-      await dataValidator(email, "email", "string", errs, {
+      await dataValidator(email, 'email', 'string', errs, {
         minLength: 1,
         maxLength: 50,
       })
@@ -53,13 +54,13 @@ export default async function (req: Request, res: Response, next: Function) {
     const opts: any = {};
 
     if (
-      await dataValidator(page, "page", "number", errs, { min: 1, max: 1000 })
+      await dataValidator(page, 'page', 'number', errs, { min: 1, max: 1000 })
     ) {
       opts.page = page;
     }
 
     if (
-      await dataValidator(pageSize, "pageSize", "number", errs, {
+      await dataValidator(pageSize, 'pageSize', 'number', errs, {
         min: 1,
         max: 100,
       })
@@ -67,12 +68,12 @@ export default async function (req: Request, res: Response, next: Function) {
       opts.pageSize = pageSize;
     }
 
-    if (await dataValidator(limit, "limit", "number", errs, { max: 1000 })) {
+    if (await dataValidator(limit, 'limit', 'number', errs, { max: 1000 })) {
       opts.limit = limit;
     }
 
     if (
-      await dataValidator(sort, "sort", "string", errs, {
+      await dataValidator(sort, 'sort', 'string', errs, {
         minLength: 1,
         maxLength: 50,
       })
@@ -85,7 +86,7 @@ export default async function (req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         data: result,
         errors: errs,
@@ -97,7 +98,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -106,12 +107,17 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("controller:", err);
+    logger.error(2, 'failed to list users', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },

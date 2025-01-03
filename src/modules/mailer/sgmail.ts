@@ -1,13 +1,6 @@
-import sgMail from "@sendgrid/mail";
-import type { TemplateDataMap } from "./templates";
-
-enum SendgridTemplates {
-  "verifyEmail" = "d-7c3ad0b0dbfe420eb28623ffe29ddc3e",
-}
-
-interface verifyEmailData {
-  verification_code: string;
-}
+import sgMail from '@sendgrid/mail';
+import type { TemplateDataMap } from './templates';
+import logger from '../logger';
 
 class SgMailer {
   private static instance: SgMailer;
@@ -32,7 +25,7 @@ class SgMailer {
     const msg = {
       to,
       from:
-        from ?? (process.env.SENDGRID_FROM_EMAIL || "noreply@durnehviir.com"),
+        from ?? (process.env.SENDGRID_FROM_EMAIL || 'noreply@durnehviir.com'),
       templateId,
       dynamicTemplateData: dynamicData || {},
     };
@@ -40,8 +33,12 @@ class SgMailer {
     try {
       await sgMail.send(msg);
     } catch (error: any) {
-      console.log("Error sending email:", error.response?.body || error);
-      throw new Error("Failed to send email");
+      logger.error(3, 'Error sending email:', {
+        to,
+        body: error.response?.body,
+        error,
+      });
+      throw new Error('Failed to send email');
     }
   }
 }

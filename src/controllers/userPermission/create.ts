@@ -1,11 +1,12 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import type { SetUserPermission } from "../../modules/userPermissions/types";
-import { dataValidator } from "../../modules/validator";
-import userHasPermission from "../../modules/userPermissions/get";
-import { PermissionsEnum } from "../../global/interfaces/permissions";
-import setUserPermission from "../../modules/userPermissions/create";
-import { stringToObjectId } from "../../modules/database/mongo";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import type { SetUserPermission } from '../../modules/userPermissions/types';
+import { dataValidator } from '../../modules/validator';
+import userHasPermission from '../../modules/userPermissions/get';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
+import setUserPermission from '../../modules/userPermissions/create';
+import { stringToObjectId } from '../../modules/database/mongo';
+import logger from '../../modules/logger';
 
 type AddUserPermissionErrors = {
   [K in keyof SetUserPermission]?: string | object;
@@ -22,7 +23,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 403,
-        message: "forbidden",
+        message: 'forbidden',
       };
       next();
       return;
@@ -31,30 +32,30 @@ export default async function (req: Request, res: Response, next: Function) {
     const newUserPermission: any = {};
 
     if (
-      await dataValidator(userId, "userId", "string", errs, { required: true })
+      await dataValidator(userId, 'userId', 'string', errs, { required: true })
     ) {
       const uObjId = await stringToObjectId(userId);
       if (!uObjId) {
-        errs.userId = "invalid userId";
+        errs.userId = 'invalid userId';
       }
 
       newUserPermission.userId = uObjId;
     }
 
     if (
-      await dataValidator(permissionId, "permissionId", "string", errs, {
+      await dataValidator(permissionId, 'permissionId', 'string', errs, {
         required: true,
       })
     ) {
       const pObjId = await stringToObjectId(permissionId);
       if (!pObjId) {
-        errs.permissionId = "invalid permissionId";
+        errs.permissionId = 'invalid permissionId';
       }
 
       newUserPermission.permissionId = pObjId;
     }
 
-    if (await dataValidator(active, "active", "boolean", errs)) {
+    if (await dataValidator(active, 'active', 'boolean', errs)) {
       newUserPermission.active = active;
     }
 
@@ -62,7 +63,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "invalid data",
+        message: 'invalid data',
         payload: { errors: errs },
       };
       next();
@@ -78,7 +79,7 @@ export default async function (req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {},
     };
     next();
@@ -87,7 +88,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload:
           Object.keys(errs).length > 0
             ? {
@@ -99,12 +100,17 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("createUserPermission ctrl:", err);
+    logger.error(5, 'failed to create user permission', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload:
         Object.keys(errs).length > 0
           ? {

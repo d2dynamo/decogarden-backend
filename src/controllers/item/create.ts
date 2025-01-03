@@ -1,10 +1,11 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import { addItem } from "../../modules/items";
-import { dataValidator } from "../../modules/validator";
-import type { AddItem } from "../../modules/items/types";
-import userHasPermission from "../../modules/userPermissions/get";
-import { PermissionsEnum } from "../../global/interfaces/permissions";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import { addItem } from '../../modules/items';
+import { dataValidator } from '../../modules/validator';
+import type { AddItem } from '../../modules/items/types';
+import userHasPermission from '../../modules/userPermissions/get';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
+import logger from '../../modules/logger';
 
 type AddItemErrors = { [K in keyof AddItem]?: string | object };
 
@@ -22,14 +23,14 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 403,
-        message: "forbidden",
+        message: 'forbidden',
       };
       next();
       return;
     }
 
     if (
-      await dataValidator(title, "title", "string", errs, {
+      await dataValidator(title, 'title', 'string', errs, {
         required: true,
         minLength: 1,
         maxLength: 50,
@@ -37,11 +38,11 @@ export default async function (req: Request, res: Response, next: Function) {
     )
       newItem.title = title;
 
-    if (await dataValidator(price, "price", "number", errs, { required: true }))
+    if (await dataValidator(price, 'price', 'number', errs, { required: true }))
       newItem.price = price;
 
     if (
-      await dataValidator(properties, "properties", "object", errs, {
+      await dataValidator(properties, 'properties', 'object', errs, {
         maxProps: 8,
       })
     ) {
@@ -53,7 +54,7 @@ export default async function (req: Request, res: Response, next: Function) {
         const v = properties[k];
 
         if (
-          await dataValidator(v, `properties.${k}`, "string", errs, {
+          await dataValidator(v, `properties.${k}`, 'string', errs, {
             minLength: 1,
             maxLength: 50,
           })
@@ -63,7 +64,7 @@ export default async function (req: Request, res: Response, next: Function) {
         delete errs[`properties.${k}`];
 
         if (
-          await dataValidator(v, `properties.${k}`, "number", errs, {
+          await dataValidator(v, `properties.${k}`, 'number', errs, {
             min: 1,
           })
         ) {
@@ -71,7 +72,7 @@ export default async function (req: Request, res: Response, next: Function) {
         }
         delete errs[`properties.${k}`];
 
-        errs.properties[k] = "must be a string or number";
+        errs.properties[k] = 'must be a string or number';
         delete properties[k];
       }
       if (Object.keys(errs.properties).length == 0) delete errs.properties;
@@ -79,14 +80,14 @@ export default async function (req: Request, res: Response, next: Function) {
       newItem.properties = properties;
     }
 
-    if (await dataValidator(amountStorage, "amountStorage", "number", errs))
+    if (await dataValidator(amountStorage, 'amountStorage', 'number', errs))
       newItem.amountStorage = amountStorage;
 
-    if (await dataValidator(active, "active", "boolean", errs))
+    if (await dataValidator(active, 'active', 'boolean', errs))
       newItem.active = active;
 
     if (
-      await dataValidator(description, "description", "string", errs, {
+      await dataValidator(description, 'description', 'string', errs, {
         minLength: 1,
         maxLength: 150,
       })
@@ -94,7 +95,7 @@ export default async function (req: Request, res: Response, next: Function) {
       newItem.description = description;
 
     if (errs.title || errs.price) {
-      throw new UserError("missing required fields", 400);
+      throw new UserError('missing required fields', 400);
     }
 
     const insId = await addItem(newItem);
@@ -102,7 +103,7 @@ export default async function (req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         insertedId: insId,
         errors: errs,
@@ -114,7 +115,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -123,12 +124,17 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("createItem ctrl:", err);
+    logger.error(2, 'failed to add item', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },

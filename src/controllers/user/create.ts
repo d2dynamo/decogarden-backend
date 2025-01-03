@@ -1,8 +1,9 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import type { SetUser } from "../../modules/users/types";
-import { dataValidator } from "../../modules/validator";
-import createUser from "../../modules/users/create";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import type { SetUser } from '../../modules/users/types';
+import { dataValidator } from '../../modules/validator';
+import createUser from '../../modules/users/create';
+import logger from '../../modules/logger';
 
 type AddUserErrors = {
   [K in keyof SetUser]?: string | object;
@@ -16,7 +17,7 @@ export default async function (req: Request, res: Response, next: Function) {
     const newUser: any = {};
 
     if (
-      await dataValidator(userName, "userName", "string", errs, {
+      await dataValidator(userName, 'userName', 'string', errs, {
         required: true,
         minLength: 1,
         maxLength: 50,
@@ -26,7 +27,7 @@ export default async function (req: Request, res: Response, next: Function) {
     }
 
     if (
-      await dataValidator(password, "password", "string", errs, {
+      await dataValidator(password, 'password', 'string', errs, {
         required: true,
         minLength: 8,
         maxLength: 50,
@@ -36,7 +37,7 @@ export default async function (req: Request, res: Response, next: Function) {
     }
 
     if (
-      await dataValidator(email, "email", "string", errs, {
+      await dataValidator(email, 'email', 'string', errs, {
         required: true,
         minLength: 5,
         maxLength: 50,
@@ -46,7 +47,7 @@ export default async function (req: Request, res: Response, next: Function) {
     }
 
     if (
-      await dataValidator(phone, "phone", "string", errs, {
+      await dataValidator(phone, 'phone', 'string', errs, {
         minLength: 10,
         maxLength: 15,
       })
@@ -58,7 +59,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "invalid user data",
+        message: 'invalid user data',
         payload: {
           errors: errs,
         },
@@ -70,7 +71,7 @@ export default async function (req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "user created",
+      message: 'user created',
       payload: { errors: errs },
     };
     next();
@@ -79,7 +80,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -88,12 +89,17 @@ export default async function (req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("controller:", err);
+    logger.error(2, 'failed to create user', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },

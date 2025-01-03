@@ -1,4 +1,6 @@
-# dekosodas-backend
+# decogarden backend
+
+Example backend for an e-commerce store
 
 To install dependencies:
 
@@ -32,8 +34,6 @@ MONGO_CA
 MONGO_CERT
 
 # TODO
-
-## Logging
 
 ## Orders and shipments
 

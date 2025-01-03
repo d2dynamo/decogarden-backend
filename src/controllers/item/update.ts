@@ -1,11 +1,12 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import type { UpdateItem } from "../../modules/items/types";
-import { updateItem } from "../../modules/items";
-import { stringToObjectId } from "../../modules/database/mongo";
-import { dataValidator } from "../../modules/validator";
-import { PermissionsEnum } from "../../global/interfaces/permissions";
-import userHasPermission from "../../modules/userPermissions/get";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import type { UpdateItem } from '../../modules/items/types';
+import { updateItem } from '../../modules/items';
+import { stringToObjectId } from '../../modules/database/mongo';
+import { dataValidator } from '../../modules/validator';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
+import userHasPermission from '../../modules/userPermissions/get';
+import logger from '../../modules/logger';
 
 type UpdateItemErrors = { [K in keyof UpdateItem]?: string | object } & {
   id?: string;
@@ -21,7 +22,7 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 403,
-        message: "forbidden",
+        message: 'forbidden',
       };
       next();
       return;
@@ -31,28 +32,28 @@ export default async function (req: Request, res: Response, next: Function) {
 
     const update: UpdateItem = {};
 
-    if (await dataValidator(title, "title", "string", errors)) {
+    if (await dataValidator(title, 'title', 'string', errors)) {
       update.title = title;
     }
 
-    if (await dataValidator(description, "description", "string", errors)) {
+    if (await dataValidator(description, 'description', 'string', errors)) {
       update.description = description;
     }
 
-    if (await dataValidator(price, "price", "number", errors)) {
+    if (await dataValidator(price, 'price', 'number', errors)) {
       update.price = price;
     }
 
-    if (await dataValidator(amountStorage, "amountStorage", "number", errors)) {
+    if (await dataValidator(amountStorage, 'amountStorage', 'number', errors)) {
       update.amountStorage = amountStorage;
     }
 
-    if (await dataValidator(active, "active", "boolean", errors)) {
+    if (await dataValidator(active, 'active', 'boolean', errors)) {
       update.active = active;
     }
 
     if (
-      await dataValidator(properties, "properties", "object", errors, {
+      await dataValidator(properties, 'properties', 'object', errors, {
         maxProps: 8,
       })
     ) {
@@ -64,7 +65,7 @@ export default async function (req: Request, res: Response, next: Function) {
         const v = properties[k];
 
         if (
-          await dataValidator(v, `properties.${k}`, "string", errors, {
+          await dataValidator(v, `properties.${k}`, 'string', errors, {
             minLength: 1,
             maxLength: 50,
           })
@@ -74,7 +75,7 @@ export default async function (req: Request, res: Response, next: Function) {
         delete errors[`properties.${k}`];
 
         if (
-          await dataValidator(v, `properties.${k}`, "number", errors, {
+          await dataValidator(v, `properties.${k}`, 'number', errors, {
             min: 1,
           })
         ) {
@@ -82,7 +83,7 @@ export default async function (req: Request, res: Response, next: Function) {
         }
         delete errors[`properties.${k}`];
 
-        errors.properties[k] = "must be a string or number";
+        errors.properties[k] = 'must be a string or number';
         delete properties[k];
       }
 
@@ -96,12 +97,12 @@ export default async function (req: Request, res: Response, next: Function) {
     const itemObjId = await stringToObjectId(id);
 
     if (!itemObjId) {
-      errors.id = "invalid item id";
+      errors.id = 'invalid item id';
 
       res.locals = {
         error: true,
         code: 400,
-        message: "invalid item id",
+        message: 'invalid item id',
         payload: { errors },
       };
       next();
@@ -112,7 +113,7 @@ export default async function (req: Request, res: Response, next: Function) {
 
     res.locals = {
       error: false,
-      message: "success",
+      message: 'success',
       code: 200,
       payload: Object.keys(errors).length > 0 ? { errors } : {},
     };
@@ -122,18 +123,23 @@ export default async function (req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
       };
       next();
       return;
     }
 
-    console.log("updateItem controller", err);
+    logger.error(2, 'failed to update item', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
     };
     next();
   }

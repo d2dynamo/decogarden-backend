@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import { verify2fa } from "../../modules/users/authenticator";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import { verify2fa } from '../../modules/users/authenticator';
+import logger from '../../modules/logger';
 
 export default async function cValidate2fa(
   req: Request,
@@ -16,7 +17,7 @@ export default async function cValidate2fa(
       res.locals = {
         error: true,
         code: 400,
-        message: "missing 2fa code",
+        message: 'missing 2fa code',
         payload: {
           errors: errs,
         },
@@ -30,7 +31,7 @@ export default async function cValidate2fa(
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         errors: errs,
       },
@@ -41,7 +42,7 @@ export default async function cValidate2fa(
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -50,12 +51,17 @@ export default async function cValidate2fa(
       return;
     }
 
-    console.log("controller validate2fa:", err);
+    logger.error(2, 'failed to validate 2fa for user', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },

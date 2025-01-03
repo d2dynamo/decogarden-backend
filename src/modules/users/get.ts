@@ -1,9 +1,6 @@
-import type { ObjectId } from "mongodb";
-import connectCollection, {
-  stringToObjectId,
-  stringToObjectIdForce,
-} from "../database/mongo";
-import { UserError } from "../../util/error";
+import type { ObjectId } from 'mongodb';
+import connectCollection, { stringToObjectId } from '../database/mongo';
+import { UserError } from '../../util/error';
 
 interface User {
   id: ObjectId;
@@ -19,7 +16,7 @@ export default async function getUser(id: ObjectId | string): Promise<User> {
     throw new Error(`invalid userId: ${id}`);
   }
 
-  const coll = await connectCollection("users");
+  const coll = await connectCollection('users');
 
   const result = await coll.findOne({ _id: userObjId });
 
@@ -36,7 +33,7 @@ export default async function getUser(id: ObjectId | string): Promise<User> {
 }
 
 export async function getUserEmail(email: string): Promise<User | false> {
-  const coll = await connectCollection("users");
+  const coll = await connectCollection('users');
 
   const result = await coll.findOne({ email: email });
 

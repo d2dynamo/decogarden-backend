@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
-import { generateToken, validateToken } from "../../modules/token";
-import { UserError } from "../../util/error";
+import type { Request, Response } from 'express';
+import { generateToken, validateToken } from '../../modules/token';
+import { UserError } from '../../util/error';
+import logger from '../../modules/logger';
 
 export async function loginUserWithEmail(
   req: Request,
@@ -9,7 +10,6 @@ export async function loginUserWithEmail(
 ) {
   try {
     const user = req.user;
-
     if (!user) {
       throw new Error(`No user found in request`);
     }
@@ -17,21 +17,21 @@ export async function loginUserWithEmail(
     const accessToken = await generateToken({
       userId: user.id,
       email: user.email,
-      expiration: "30m",
-      type: "access_token",
+      expiration: '30m',
+      type: 'access_token',
     });
 
     const refreshToken = await generateToken({
       userId: user.id,
       email: user.email,
-      expiration: "4h",
-      type: "refresh_token",
+      expiration: '4h',
+      type: 'refresh_token',
     });
 
     res.locals = {
       error: true,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         accessToken,
         refreshToken,
@@ -39,11 +39,14 @@ export async function loginUserWithEmail(
     };
     next();
   } catch (err) {
-    console.log(err);
+    logger.error(1, 'loginUserWithEmail controller:', {
+      userId: req.user?.id,
+      error: err,
+    });
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
     };
     next();
   }
@@ -58,10 +61,10 @@ export async function refreshTokens(
     const refreshToken = req.cookies.RefreshToken;
 
     if (!refreshToken) {
-      throw new UserError("No refresh token provided", 400);
+      throw new UserError('No refresh token provided', 400);
     }
 
-    const decoded = await validateToken(refreshToken, "refresh_token");
+    const decoded = await validateToken(refreshToken, 'refresh_token');
 
     if (
       !decoded.verified ||
@@ -70,27 +73,27 @@ export async function refreshTokens(
       !decoded.jwt.payload.sub ||
       !decoded.jwt.payload.sub_email
     ) {
-      throw new UserError("Invalid refresh token", 400);
+      throw new UserError('Invalid refresh token', 400);
     }
 
     const accessToken = await generateToken({
       userId: decoded.jwt.payload.sub,
       email: decoded.jwt.payload.sub_email,
-      expiration: "30m",
-      type: "access_token",
+      expiration: '30m',
+      type: 'access_token',
     });
 
     const refreshTokenNew = await generateToken({
       userId: decoded.jwt.payload.sub,
       email: decoded.jwt.payload.sub_email,
-      expiration: "4h",
-      type: "refresh_token",
+      expiration: '4h',
+      type: 'refresh_token',
     });
 
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         accessToken,
         refreshToken: refreshTokenNew,
@@ -99,19 +102,30 @@ export async function refreshTokens(
     next();
   } catch (err) {
     if (err instanceof UserError) {
+      logger.error(8, 'failed to refresh token for user', {
+        userId: req.user?.id,
+        error: err,
+      });
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
       };
       next();
       return;
     }
-    console.log("refreshTokens controller:", err);
+
+    logger.error(2, 'refreshTokens controller:', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
+
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
     };
     next();
   }

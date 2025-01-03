@@ -1,7 +1,8 @@
-import type { Request, Response } from "express";
-import { UserError } from "../../util/error";
-import { enable2fa, generate2fa } from "../../modules/users/authenticator";
-import { stringToObjectId } from "../../modules/database/mongo";
+import type { Request, Response } from 'express';
+import { UserError } from '../../util/error';
+import { enable2fa, generate2fa } from '../../modules/users/authenticator';
+import { stringToObjectId } from '../../modules/database/mongo';
+import logger from '../../modules/logger';
 
 export default async function cGenerate2fa(
   req: Request,
@@ -18,7 +19,7 @@ export default async function cGenerate2fa(
       res.locals = {
         error: true,
         code: 400,
-        message: "invalid user id",
+        message: 'invalid user id',
         payload: {
           errors: errs,
         },
@@ -31,7 +32,7 @@ export default async function cGenerate2fa(
       res.locals = {
         error: true,
         code: 400,
-        message: "password required for setting 2fa",
+        message: 'password required for setting 2fa',
         payload: {
           errors: errs,
         },
@@ -45,7 +46,7 @@ export default async function cGenerate2fa(
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         errors: errs,
         code,
@@ -57,7 +58,7 @@ export default async function cGenerate2fa(
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -66,12 +67,17 @@ export default async function cGenerate2fa(
       return;
     }
 
-    console.log("controller gen2fa:", err);
+    logger.error(2, 'failed to generate 2fa for user', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },
@@ -90,7 +96,7 @@ export async function cEnable2fa(req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: 400,
-        message: "missing user id or code",
+        message: 'missing user id or code',
         payload: {
           errors: errs,
         },
@@ -104,7 +110,7 @@ export async function cEnable2fa(req: Request, res: Response, next: Function) {
     res.locals = {
       error: false,
       code: 200,
-      message: "success",
+      message: 'success',
       payload: {
         errors: errs,
       },
@@ -115,7 +121,7 @@ export async function cEnable2fa(req: Request, res: Response, next: Function) {
       res.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || "unknown client error",
+        message: err.message || 'unknown client error',
         payload: {
           errors: errs,
         },
@@ -124,12 +130,17 @@ export async function cEnable2fa(req: Request, res: Response, next: Function) {
       return;
     }
 
-    console.log("controller enable2fa:", err);
+    logger.error(2, 'failed to enable 2fa for user', {
+      userId: req.user?.id,
+      error: err,
+      headers: req.headers,
+      body: req.body,
+    });
 
     res.locals = {
       error: true,
       code: 500,
-      message: "internal server error",
+      message: 'internal server error',
       payload: {
         errors: errs,
       },
