@@ -1,36 +1,49 @@
-import connectCollection from "../database/mongo";
-import type { SetUserPermission } from "./types";
-import getUser from "../users/get";
+import connectCollection, { stringToObjectId } from '../database/mongo';
+import type { SetUserPermission } from './types';
+import getUser from '../users/get';
 
 /** Use this as both create and update. */
-export default async function setUserPermission(set: SetUserPermission) {
+export default async function addUserPermission(set: SetUserPermission) {
   await getUser(set.userId);
 
-  const coll = await connectCollection("userPermissions");
+  const permObjId = await stringToObjectId(set.permissionId);
+  const userObjId = await stringToObjectId(set.userId);
 
-  const result = await coll.updateOne(
-    {
-      userId: set.userId,
-      permissionId: set.permissionId,
+  if (!permObjId || !userObjId) {
+    throw new Error('invalid id');
+  }
+
+  const coll = await connectCollection('userPermissions');
+
+  const filter = { userId: userObjId };
+
+  const update = {
+    $set: {
+      'permissions.$[permission].active': set.active ?? true,
+      'permissions.$[permission].updatedAt': new Date(),
     },
-    {
-      $setOnInsert: {
-        userId: set.userId,
-        permissionId: set.permissionId,
-        createdAt: new Date(),
-      },
-      $set: {
-        active: set.active ?? true,
-        updatedAt: new Date(),
+
+    $push: {
+      permissions: {
+        $each: [
+          {
+            id: permObjId,
+            active: set.active ?? true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        $position: 0,
       },
     },
-    {
-      upsert: true,
-    }
-  );
+  };
+
+  const options = { arrayFilters: [{ 'permission.id': permObjId }] };
+
+  const result = await coll.updateOne(filter, update, options);
 
   if (result.matchedCount && !result.upsertedCount && !result.modifiedCount) {
-    throw new Error("failed to create permission");
+    throw new Error('failed to create permission');
   }
 
   return true;

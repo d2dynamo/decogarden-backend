@@ -4,7 +4,7 @@
  * @param code number
  *
  */
-export class UserError extends Error {
+class UserError extends Error {
   code: number;
 
   constructor(message: string, code: number = 400) {
@@ -12,3 +12,11 @@ export class UserError extends Error {
     this.code = code;
   }
 }
+
+class DataValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export { UserError, DataValidationError };

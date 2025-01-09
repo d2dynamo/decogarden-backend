@@ -1,20 +1,20 @@
-import type { ObjectId } from "mongodb";
-import type { LogLevel, LogType } from "../../modules/logger/types";
+import type { ObjectId } from 'mongodb';
+import type { LogLevel, LogType } from '../../modules/logger/types';
 
-type PaymentMethod = "stripe" | "paysera" | "transfer";
+type PaymentMethod = 'stripe' | 'paysera' | 'transfer';
 type OrderStatus =
-  | "awaitingPayment"
-  | "failedPayment"
-  | "cancelled"
-  | "delivering"
-  | "completed";
+  | 'awaitingPayment'
+  | 'failedPayment'
+  | 'cancelled'
+  | 'delivering'
+  | 'completed';
 
 interface DefaultDoc {
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type Dates = "createdAt" | "updatedAt";
+export type Dates = 'createdAt' | 'updatedAt';
 
 /**
  *  NOTE: All docs have a _id.
@@ -90,10 +90,14 @@ export interface PermissionDoc extends DefaultDoc {
   active: boolean;
 }
 
-export interface UserPermissionDoc extends DefaultDoc {
+export interface UserPermissionDoc extends Omit<DefaultDoc, Dates> {
   userId: ObjectId;
-  permissionId: ObjectId;
-  active: boolean;
+  permissions: {
+    id: ObjectId;
+    active: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
 }
 
 export interface ShipmentDoc {}

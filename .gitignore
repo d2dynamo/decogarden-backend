@@ -4,3 +4,5 @@ node_modules
 
 .vscode/*
 !.vscode/project-snippets.code-snippets
+
+logs

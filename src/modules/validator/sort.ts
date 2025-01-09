@@ -1,25 +1,31 @@
-import type { ErrorsDesc, ObjectValidateOpts } from ".";
+import { DataValidationError } from '../../util/error';
+import { type SortValidateOpts } from './types';
+import { ErrorMessage } from './util';
 
-export default function sortValidator(
+function sortValidator(
   val: any,
-  fieldName: string,
-  errs: ErrorsDesc,
-  options: ObjectValidateOpts
-): object | false {
-  if (options.required && (val === undefined || val === null)) {
-    errs[fieldName] = "missing required field";
-    return false;
-  } else if (val === undefined || val === null) {
-    return false;
-  }
-
-  const isObject = val !== null && typeof val === "object";
+  options?: SortValidateOpts
+): { validSort: { [key: string]: 1 | -1 }; errors: { [key: string]: string } } {
+  const isObject = val !== null && typeof val === 'object';
   if (!isObject) {
-    errs[fieldName] = "expected object";
-    return false;
+    throw new DataValidationError(ErrorMessage.expectedObject);
   }
 
-  const { minProps = 1, maxProps = 1000 } = options;
+  let minProps = 1,
+    maxProps = 1000;
+  if (options) {
+    options.minProps ? (minProps = options.minProps) : (minProps = 1);
+    options.maxProps ? (maxProps = options.maxProps) : (maxProps = 1000);
+  }
+
+  if (maxProps > 1000) {
+    maxProps = 1000;
+  }
+
+  const returnObj = {
+    validSort: {},
+    errors: {},
+  };
 
   let amountProps = 0;
   for (const key in val) {
@@ -27,28 +33,33 @@ export default function sortValidator(
       amountProps++;
     }
 
-    if (maxProps !== undefined && amountProps > maxProps) {
-      errs[
-        fieldName
-      ] = `object property count out of range (${minProps}-${maxProps})`;
-      return false;
+    // Check max props here incase of excessive loop
+    if (amountProps > maxProps || amountProps > 1000) {
+      throw new DataValidationError(
+        ErrorMessage.objectPropertyCountOutOfRange +
+          `(min:${minProps} max:${maxProps})`
+      );
     }
 
     if (val.hasOwnProperty(key) && val[key] !== 1 && val[key] !== -1) {
-      errs.sort = {
-        ...(errs.sort as object),
-        [key]: "invalid sort value, must be 1 or -1",
-      };
-      return false;
+      returnObj.errors[key] = 'invalid sort value, must be 1 or -1';
     }
+
+    returnObj.validSort[key] = val[key];
   }
 
-  if (minProps !== undefined && amountProps < minProps) {
-    errs[
-      fieldName
-    ] = `object property count out of range (${minProps}-${maxProps})`;
-    return false;
+  if (options?.required && amountProps < 1) {
+    throw new DataValidationError(ErrorMessage.missingRequired);
   }
 
-  return val as object;
+  if (amountProps < minProps) {
+    throw new DataValidationError(
+      ErrorMessage.objectPropertyCountOutOfRange +
+        `(min:${minProps} max:${maxProps})`
+    );
+  }
+
+  return returnObj;
 }
+
+export default sortValidator;

@@ -61,7 +61,7 @@ export async function enable2fa(userId: ObjectId | string, token: string) {
     throw new UserError('Secret expired', 400);
   }
 
-  const validToken = await totp(secret, 2, 1);
+  const validToken = await totp(secret, 3, 1);
 
   if (!validToken.includes(token)) {
     throw new UserError('Invalid token', 400);

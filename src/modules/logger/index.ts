@@ -12,7 +12,7 @@ function consoleLog(t: LogType, l: LogLevel, m: string, d: LogData) {
     const [logType, logLevelValue] = logLevel.split(':');
     if (l <= parseInt(logLevelValue)) {
       console[logType.toLowerCase()](m);
-      if (d) console.log(d);
+      if (Object.keys(d).length) console.log(d);
     }
   }
 }

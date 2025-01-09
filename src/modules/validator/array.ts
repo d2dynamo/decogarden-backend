@@ -1,32 +1,27 @@
-import type { ErrorsDesc, ArrayValidateOpts } from "./index";
+import { DataValidationError } from '../../util/error';
+import { type ArrayValidateOpts } from './types';
+import { ErrorMessage } from './util';
 
-export default function arrayValidator(
-  val: any,
-  fieldName: string,
-  errs: ErrorsDesc,
-  options: ArrayValidateOpts
-): any[] | false {
-  if (options.required && (val === undefined || val === null)) {
-    errs[fieldName] = "missing required field";
-    return false;
-  } else if (val === undefined || val === null) {
-    return false;
-  }
-
+function arrayValidator(val: any, options?: ArrayValidateOpts): any[] | string {
   const isArray = Array.isArray(val);
   if (!isArray) {
-    errs[fieldName] = "expected array";
-    return false;
+    throw new DataValidationError(ErrorMessage.expectedArray);
   }
 
-  const { minLength = 1, maxLength = 1000 } = options;
-  if (
-    (minLength !== undefined && val.length < minLength) ||
-    (maxLength !== undefined && val.length > maxLength)
-  ) {
-    errs[fieldName] = `array length out of range (${minLength}-${maxLength})`;
-    return false;
+  let minLength = 0,
+    maxLength = 1000;
+  if (options) {
+    options.minLength ? (minLength = options.minLength) : (minLength = 0);
+    options.maxLength ? (maxLength = options.maxLength) : (maxLength = 1000);
+  }
+
+  if (val.length < minLength || val.length > maxLength) {
+    throw new DataValidationError(
+      ErrorMessage.arrayOutOfRange + `(min:${minLength} max:${maxLength})`
+    );
   }
 
   return val;
 }
+
+export default arrayValidator;

@@ -1,150 +1,102 @@
 import type { Request, Response } from 'express';
-import { UserError } from '../../util/error';
-import { enable2fa, generate2fa } from '../../modules/users/authenticator';
-import { stringToObjectId } from '../../modules/database/mongo';
-import logger from '../../modules/logger';
 
-export default async function cGenerate2fa(
-  req: Request,
-  res: Response,
-  next: Function
-) {
-  const errs = {};
-  try {
-    const userId = req.user.id;
-    const { password } = req.body;
+import {
+  generate2fa,
+  enable2fa,
+  verify2fa,
+} from '../../modules/users/authenticator';
+import Controller from '../controller';
 
-    const userObjId = await stringToObjectId(userId);
-    if (!userObjId) {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: 'invalid user id',
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
+async function generate2faLogic(this: Controller) {
+  const data = await this.validateData(this.req.body, {
+    userId: {
+      type: 'string',
+      options: { required: true },
+    },
+    password: {
+      type: 'string',
+      options: { required: true },
+    },
+  });
 
-    if (!password) {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: 'password required for setting 2fa',
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
+  const secret = await generate2fa(data.userId, data.password);
 
-    const code = await generate2fa(userObjId, password);
-
-    res.locals = {
-      error: false,
-      code: 200,
-      message: 'success',
-      payload: {
-        errors: errs,
-        code,
-      },
-    };
-    next();
-  } catch (err) {
-    if (err instanceof UserError) {
-      res.locals = {
-        error: true,
-        code: err.code || 400,
-        message: err.message || 'unknown client error',
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
-
-    logger.error(2, 'failed to generate 2fa for user', {
-      userId: req.user?.id,
-      error: err,
-      headers: req.headers,
-      body: req.body,
-    });
-
-    res.locals = {
-      error: true,
-      code: 500,
-      message: 'internal server error',
-      payload: {
-        errors: errs,
-      },
-    };
-    next();
-  }
+  this.locals = {
+    error: false,
+    code: 200,
+    message: 'success',
+    payload: {
+      secret,
+    },
+  };
+  this.next();
 }
 
-export async function cEnable2fa(req: Request, res: Response, next: Function) {
-  const errs = {};
-  try {
-    const userId = req.user.id;
-    const { code } = req.body;
+const generate2faController = (req: Request, res: Response, next: Function) => {
+  return new Controller(req, res, next, generate2faLogic, {
+    name: 'generate2fa',
+    errorLevel: 2,
+  }).run();
+};
 
-    if (!userId || !code) {
-      res.locals = {
-        error: true,
-        code: 400,
-        message: 'missing user id or code',
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
+async function enable2faLogic(this: Controller) {
+  const data = await this.validateData(this.req.body, {
+    userId: {
+      type: 'string',
+      options: { required: true },
+    },
+    token: {
+      type: 'string',
+      options: { required: true },
+    },
+  });
 
-    await enable2fa(userId, code);
+  await enable2fa(data.userId, data.token);
 
-    res.locals = {
-      error: false,
-      code: 200,
-      message: 'success',
-      payload: {
-        errors: errs,
-      },
-    };
-    next();
-  } catch (err) {
-    if (err instanceof UserError) {
-      res.locals = {
-        error: true,
-        code: err.code || 400,
-        message: err.message || 'unknown client error',
-        payload: {
-          errors: errs,
-        },
-      };
-      next();
-      return;
-    }
-
-    logger.error(2, 'failed to enable 2fa for user', {
-      userId: req.user?.id,
-      error: err,
-      headers: req.headers,
-      body: req.body,
-    });
-
-    res.locals = {
-      error: true,
-      code: 500,
-      message: 'internal server error',
-      payload: {
-        errors: errs,
-      },
-    };
-    next();
-  }
+  this.locals = {
+    error: false,
+    code: 200,
+    message: 'success',
+    payload: {},
+  };
+  this.next();
 }
+
+const enable2faController = (req: Request, res: Response, next: Function) => {
+  return new Controller(req, res, next, enable2faLogic, {
+    name: 'enable2fa',
+    errorLevel: 2,
+  }).run();
+};
+
+async function verify2faLogic(this: Controller) {
+  const data = await this.validateData(this.req.body, {
+    userId: {
+      type: 'string',
+      options: { required: true },
+    },
+    token: {
+      type: 'string',
+      options: { required: true },
+    },
+  });
+
+  await verify2fa(data.userId, data.token);
+
+  this.locals = {
+    error: false,
+    code: 200,
+    message: 'success',
+    payload: {},
+  };
+  this.next();
+}
+
+const verify2faController = (req: Request, res: Response, next: Function) => {
+  return new Controller(req, res, next, verify2faLogic, {
+    name: 'verify2fa',
+    errorLevel: 2,
+  }).run();
+};
+
+export { generate2faController, enable2faController, verify2faController };

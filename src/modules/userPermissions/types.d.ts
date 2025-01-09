@@ -1,22 +1,21 @@
 import type {
   Dates,
   UserPermissionDoc,
-} from "../../global/interfaces/database";
+} from '../../global/interfaces/database';
 
-export interface UserPermission extends Omit<UserPermissionDoc, Dates> {
+export interface UserPermissions extends Omit<UserPermissionDoc, Dates> {
   id: string;
-  permissionId: string;
-  createdAt: number;
-  updatedAt: number;
+  permissions: string[];
 }
 
-export interface SetUserPermission
-  extends Omit<UserPermissionDoc, Dates | "active"> {
+export interface SetUserPermission {
+  userId: string | ObjectId;
+  permissionId: string;
   active?: boolean; // default: true
 }
 
 export interface ListUserPermissionFilter {}
 
-export interface ListUserPermission extends Omit<UserPermission, "userId"> {
+export interface ListUserPermission extends Omit<UserPermission, 'userId'> {
   name: string;
 }

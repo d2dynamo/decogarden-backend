@@ -1,19 +1,20 @@
-import type { ObjectId } from "mongodb";
+import type { ObjectId } from 'mongodb';
 import connectCollection, {
   stringToObjectId,
   stringToObjectIdSync,
-} from "../database/mongo";
-import getUser from "../users/get";
-import { PermissionsEnum } from "../../global/interfaces/permissions";
+} from '../database/mongo';
+import getUser from '../users/get';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
 
 const customerObjId = stringToObjectIdSync(PermissionsEnum.customer);
 const inventoryObjId = stringToObjectIdSync(PermissionsEnum.inventory);
 const salesObjId = stringToObjectIdSync(PermissionsEnum.sales);
 const adminObjId = stringToObjectIdSync(PermissionsEnum.admin);
 
+// Returns an array of permissions that has access to the given permission
 function permissionHierarchy(permissionId: string) {
   if (!customerObjId || !inventoryObjId || !salesObjId || !adminObjId) {
-    throw new Error("invalid permissionId, check permissions enum");
+    throw new Error('invalid permissionId, check permissions enum');
   }
 
   const hierarchy = {
@@ -33,36 +34,43 @@ function permissionHierarchy(permissionId: string) {
 
 export default async function userHasPermission(
   userId: ObjectId | string,
-  permissionId: string
+  validPermissionId: string[]
 ) {
   await getUser(userId);
+  console.log('checking user perms', userId, validPermissionId);
 
   const userObjId = await stringToObjectId(userId);
 
   if (!userObjId) {
-    throw new Error("invalid userId");
+    throw new Error('invalid userId');
   }
 
-  const permObjId = await stringToObjectId(permissionId);
+  const validPermIds: ObjectId[] = [];
 
-  if (!permObjId) {
-    throw new Error("invalid permissionId");
+  for (let i = 0; i < validPermissionId.length; i++) {
+    const pid = await stringToObjectId(validPermissionId[i]);
+
+    if (!pid) {
+      throw new Error('invalid permissionId');
+    }
+
+    validPermIds.push(pid);
   }
 
-  const coll = await connectCollection("userPermissions");
+  const coll = await connectCollection('userPermissions');
 
-  const cursor = coll.find({
+  const result = await coll.findOne({
     userId: userObjId,
-    permissionId: { $in: permissionHierarchy(permissionId) },
-    active: true,
+    permissions: {
+      $elemMatch: {
+        id: { $in: validPermIds },
+        active: true,
+      },
+    },
   });
 
-  while (await cursor.hasNext()) {
-    const item = await cursor.next();
-
-    if (item && item._id) {
-      return true;
-    }
+  if (result && result._id) {
+    return true;
   }
 
   return false;

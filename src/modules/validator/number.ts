@@ -1,34 +1,31 @@
-import type { ErrorsDesc, NumberValidateOpts } from "./index";
+import { DataValidationError } from '../../util/error';
+import { type NumberValidateOpts } from './types';
+import { ErrorMessage } from './util';
 
-export default function numberValidator(
-  val: any,
-  fieldName: string,
-  errs: ErrorsDesc,
-  options: NumberValidateOpts
-): number | false {
-  if (options.required && (val === undefined || val === null)) {
-    errs[fieldName] = "missing required field";
-    return false;
-  } else if (val === undefined || val === null) {
-    return false;
-  }
-
+function numberValidator(val: any, options?: NumberValidateOpts): number {
   const num = Number(val);
   if (isNaN(num)) {
-    errs[fieldName] = "invalid number";
-    return false;
+    throw new DataValidationError(ErrorMessage.invalidNumber);
+  }
+
+  let min = -999999999,
+    max = 999999999;
+  if (options) {
+    options.min ? (min = options.min) : (min = -999999999);
+    options.max ? (max = options.max) : (max = 999999999);
   }
 
   if (!Number.isFinite(num)) {
-    errs[fieldName] = "number must be finite";
-    return false;
+    throw new DataValidationError(ErrorMessage.numberMustBeFinite);
   }
 
-  const { min = 0, max = 999999999 } = options;
-  if ((min !== undefined && val < min) || (max !== undefined && val > max)) {
-    errs[fieldName] = `number out of range (${min}-${max})`;
-    return false;
+  if (val < min || val > max) {
+    throw new DataValidationError(
+      ErrorMessage.numberOutOfRange + `(min:${min} max:${max})`
+    );
   }
 
-  return Number(val);
+  return val as number;
 }
+
+export default numberValidator;

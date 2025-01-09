@@ -1,15 +1,22 @@
-import Router from "express";
+import Router from 'express';
 
-import passport from "../modules/passport";
-import { loginUserWithEmail, refreshTokens } from "../controllers/auth/local";
-import { cVerifyEmail } from "../controllers/auth/verify";
+import passport from '../modules/passport';
+import {
+  verifyUserController,
+  refreshTokensController,
+  loginUserWithEmailController,
+} from '../controllers/auth';
 
 const router = Router();
 
-router.post("/verify/email", cVerifyEmail);
+router.post('/verify', verifyUserController);
 
-router.get("/refreshTokens", refreshTokens);
+router.get('/refreshTokens', refreshTokensController);
 
-router.post("/local", passport.authenticate("local"), loginUserWithEmail);
+router.post(
+  '/local',
+  passport.authenticate('local'),
+  loginUserWithEmailController
+);
 
 export default router;

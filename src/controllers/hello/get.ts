@@ -1,61 +1,34 @@
 import type { Request, Response } from 'express';
 
-import { UserError } from '../../util/error';
-import logger from '../../modules/logger';
+import Controller from '../controller';
 
-export default async function getHello(
-  req: Request,
-  res: Response,
-  next: Function
-) {
-  try {
-    const secret = req.body.secret;
+async function logic(this: Controller) {
+  const data = await this.validateData(this.req.query, {
+    secret: { type: 'string' },
+  });
 
-    if (secret == 'big') {
-      res.locals = {
-        error: false,
-        message: 'big if true',
-        code: 200,
-        payload: {},
-      };
-      next();
-      return;
-    }
-
-    res.locals = {
+  if (data.secret === 'big') {
+    this.locals = {
       error: false,
-      message: 'hello world',
       code: 200,
-      payload: {
-        data: 'Hi!',
-      },
+      message: 'big if true',
     };
-    next();
-  } catch (err: any) {
-    if (err instanceof UserError) {
-      res.locals = {
-        error: true,
-        message: err.message,
-        code: err.code,
-        payload: {},
-      };
-      next();
-      return;
-    }
-
-    logger.error(1, 'getHello controller:', {
-      userId: req.user?.id,
-      error: err,
-      headers: req.headers,
-      body: req.body,
-    });
-
-    res.locals = {
-      error: true,
-      message: 'internal server error',
-      code: 500,
-      payload: {},
-    };
-    next();
+    this.next();
+    return;
   }
+
+  this.locals = {
+    error: false,
+    code: 200,
+    message: 'Hello world',
+  };
+  this.next();
 }
+
+const helloController = (req: Request, res: Response, next: Function) => {
+  return new Controller(req, res, next, logic, {
+    name: 'HelloController',
+  }).run();
+};
+
+export default helloController;

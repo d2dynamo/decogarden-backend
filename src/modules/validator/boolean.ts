@@ -1,20 +1,20 @@
-import type { ErrorsDesc, ValidateOptions } from "./index";
+import { DataValidationError } from '../../util/error';
+import { ErrorMessage } from './util';
 
-export default function booleanValidator(
-  val: any,
-  fieldName: string,
-  errs: ErrorsDesc,
-  options?: ValidateOptions
-): boolean | false {
-  if (options?.required && (val === undefined || val === null)) {
-    errs[fieldName] = "missing required field";
+function booleanValidator(val: any): boolean | string {
+  if (val === 'true' || val === 1) {
+    return true;
+  }
+
+  if (val === 'false' || val === 0) {
     return false;
   }
 
-  if (val !== undefined && typeof val !== "boolean") {
-    errs[fieldName] = "expected boolean";
-    return false;
+  if (val !== undefined && typeof val !== 'boolean') {
+    throw new DataValidationError(ErrorMessage.expectedBoolean);
   }
 
   return val;
 }
+
+export default booleanValidator;

@@ -1,32 +1,26 @@
-import type { ErrorsDesc, StringValidateOpts } from "./index";
+import { DataValidationError } from '../../util/error';
+import { type PhoneNumberValidateOpts } from './types';
+import { ErrorMessage } from './util';
 
-export default function stringValidator(
+function phoneNumberValidator(
   val: any,
-  fieldName: string,
-  errs: ErrorsDesc,
-  options: StringValidateOpts
-): string | false {
-  if (options.required && (val === undefined || val === null)) {
-    errs[fieldName] = "missing required field";
-    return false;
-  } else if (val === undefined || val === null) {
-    return false;
+  options?: PhoneNumberValidateOpts
+): string {
+  if (typeof val !== 'string') {
+    throw new DataValidationError(ErrorMessage.expectedString);
   }
 
-  const isString = typeof val === "string";
-  if (!isString) {
-    errs[fieldName] = "expected string";
-    return false;
+  val.replace(/[\s()-]/g, '');
+
+  if (options?.international && !/^\+?[1-9]\d{1,14}$/.test(val)) {
+    throw new DataValidationError(ErrorMessage.internationalPhoneNumberInvalid);
   }
 
-  const { minLength = 1, maxLength = 999 } = options;
-  if (
-    (minLength !== undefined && val.length < minLength) ||
-    (maxLength !== undefined && val.length > maxLength)
-  ) {
-    errs[fieldName] = `string length out of range (${minLength}-${maxLength})`;
-    return false;
+  if (!/^\+?\d{3,15}$/.test(val)) {
+    throw new DataValidationError(ErrorMessage.phoneNumberInvalid);
   }
 
-  return val;
+  return val as string;
 }
+
+export default phoneNumberValidator;
