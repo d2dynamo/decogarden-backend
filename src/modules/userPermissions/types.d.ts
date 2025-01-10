@@ -3,10 +3,18 @@ import type {
   UserPermissionDoc,
 } from '../../global/interfaces/database';
 
-export interface UserPermissions extends Omit<UserPermissionDoc, Dates> {
+export interface UserPermission {
   id: string;
-  permissions: string[];
+  name: string;
+  active: boolean;
+  createdAt: number;
+  updatedAt: number;
 }
+
+export type FUserHasPermission = (
+  userId: string,
+  permissionId: string
+) => Promise<boolean>;
 
 export interface SetUserPermission {
   userId: string | ObjectId;
@@ -14,8 +22,8 @@ export interface SetUserPermission {
   active?: boolean; // default: true
 }
 
-export interface ListUserPermissionFilter {}
+export type FSetUserPermission = (input: SetUserPermission) => Promise<boolean>;
 
-export interface ListUserPermission extends Omit<UserPermission, 'userId'> {
-  name: string;
-}
+export type FListUserPermissions = (
+  o?: ListOptions<ListUserPermissionSorts>
+) => Promise<UserPermission[]>;

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 
 import { PermissionsEnum } from '../../global/interfaces/permissions';
-import addUserPermission from '../../modules/userPermissions/create';
+import setUserPermission from '../../modules/userPermissions/set';
 
 import Controller from '../controller';
 
@@ -12,7 +12,7 @@ async function logic(this: Controller) {
     active: { type: 'boolean' },
   });
 
-  const result = await addUserPermission(data);
+  const result = await setUserPermission(data);
 
   this.locals = {
     error: false,

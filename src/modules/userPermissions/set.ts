@@ -1,13 +1,15 @@
 import connectCollection, { stringToObjectId } from '../database/mongo';
-import type { SetUserPermission } from './types';
-import getUser from '../users/get';
+import type { FSetUserPermission, SetUserPermission } from './types';
+import { getUserBasic } from '../users';
 
 /** Use this as both create and update. */
-export default async function addUserPermission(set: SetUserPermission) {
-  await getUser(set.userId);
+const setUserPermission: FSetUserPermission = async (
+  input: SetUserPermission
+) => {
+  await getUserBasic(input.userId);
 
-  const permObjId = await stringToObjectId(set.permissionId);
-  const userObjId = await stringToObjectId(set.userId);
+  const permObjId = await stringToObjectId(input.permissionId);
+  const userObjId = await stringToObjectId(input.userId);
 
   if (!permObjId || !userObjId) {
     throw new Error('invalid id');
@@ -19,7 +21,7 @@ export default async function addUserPermission(set: SetUserPermission) {
 
   const update = {
     $set: {
-      'permissions.$[permission].active': set.active ?? true,
+      'permissions.$[permission].active': input.active ?? true,
       'permissions.$[permission].updatedAt': new Date(),
     },
 
@@ -28,7 +30,7 @@ export default async function addUserPermission(set: SetUserPermission) {
         $each: [
           {
             id: permObjId,
-            active: set.active ?? true,
+            active: typeof input.active === 'boolean' ? input.active : true,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -47,4 +49,6 @@ export default async function addUserPermission(set: SetUserPermission) {
   }
 
   return true;
-}
+};
+
+export default setUserPermission;

@@ -1,12 +1,20 @@
-import connectCollection from "../database/mongo";
-import type { ListPermission } from "./types";
+import connectCollection from '../database/mongo';
+import type { FListPermissions, Permission } from './types';
 
-export default async function (): Promise<ListPermission[]> {
-  const coll = await connectCollection("permissions");
+const listPermissions: FListPermissions = async (
+  showInactive: boolean = false
+) => {
+  const coll = await connectCollection('permissions');
 
-  const cursor = coll.find({});
+  const q: any = {};
 
-  const perms: ListPermission[] = [];
+  if (!showInactive) {
+    q.active = true;
+  }
+
+  const cursor = coll.find(q);
+
+  const perms: Permission[] = [];
 
   while (await cursor.hasNext()) {
     const item = await cursor.next();
@@ -16,8 +24,8 @@ export default async function (): Promise<ListPermission[]> {
     }
 
     perms.push({
-      id: item._id.toString(),
-      name: item.name || "unknown permission",
+      id: String(item._id),
+      name: item.name || 'unknown permission',
       active: item.active || false,
       createdAt: item.createdAt.getTime(),
       updatedAt: item.updatedAt.getTime(),
@@ -25,4 +33,6 @@ export default async function (): Promise<ListPermission[]> {
   }
 
   return perms;
-}
+};
+
+export default listPermissions;

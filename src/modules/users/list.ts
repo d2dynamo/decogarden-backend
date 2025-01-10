@@ -1,30 +1,21 @@
-import type { ListOptions } from "../../global/interfaces/controller";
-import connectCollection from "../database/mongo";
-import type { ListUser, ListUserFilter, ListUserSorts } from "./types";
+import connectCollection from '../database/mongo';
+import type { FListUsers, User } from './types';
 
-export default async function listUsers(
-  filter?: ListUserFilter,
-  listOpts?: ListOptions<ListUserSorts>
-): Promise<ListUser[]> {
-  const coll = await connectCollection("users");
+const listUsers: FListUsers = async (filter?, listOpts?) => {
+  const coll = await connectCollection('users');
 
-  const query: any = {};
+  const query: any = {
+    archivedAt: { $exists: false },
+  };
 
   if (filter?.userName) {
-    query.userName = { $regex: filter.userName, $options: "i" };
+    query.userName = { $regex: filter.userName, $options: 'i' };
   }
   if (filter?.email) {
-    query.email = { $regex: filter.email, $options: "i" };
+    query.email = { $regex: filter.email, $options: 'i' };
   }
-
-  const sort: any = {};
-  if (listOpts?.sort) {
-    const keys = Object.keys(listOpts.sort);
-
-    for (let i = 0; i < keys.length; i++) {
-      const k = keys[i];
-      sort[k] = listOpts.sort[k];
-    }
+  if (filter?.mustBeVerified) {
+    query.emailVerify = true;
   }
 
   const projection: any = {
@@ -39,11 +30,11 @@ export default async function listUsers(
 
   const cursor = coll
     .find(query, { projection })
-    .sort(sort)
+    .sort(listOpts?.sort || { createdAt: -1 })
     .skip(skip)
     .limit(pageSize);
 
-  const users: ListUser[] = [];
+  const users: Pick<User, 'id' | 'userName' | 'email'>[] = [];
   while (await cursor.hasNext()) {
     const doc = await cursor.next();
 
@@ -52,11 +43,13 @@ export default async function listUsers(
     }
 
     users.push({
-      id: doc._id,
+      id: String(doc._id),
       userName: doc.userName,
       email: doc.email,
     });
   }
 
   return users;
-}
+};
+
+export default listUsers;

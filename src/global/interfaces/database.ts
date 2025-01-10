@@ -46,13 +46,14 @@ export interface UserDoc extends DefaultDoc {
   ttl?: Date; // time to live on user creation, 1 day until verified.
   lastLoginAttempt?: Date;
   lastLogin?: Date;
+  archivedAt?: Date; // If user is archived. User should not be used in any operations except direct get.
 }
 
 export interface ItemDoc extends DefaultDoc {
   title: string;
-  description?: string;
   price: number; //float in euro
-  properties?: { [key: string]: string | number | object };
+  description?: string;
+  properties?: Record<string, any>;
   amountStorage?: number;
   active: boolean;
 }

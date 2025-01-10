@@ -1,29 +1,24 @@
-import type { AddItem } from "./types";
-import connectCollection from "../database/mongo";
+import type { FCreateItem } from './types';
+import connectCollection from '../database/mongo';
 
-/** Inserts new item. If failed to insert throws error.
- *
- * @param newItem {AddItem}
- * @returns inserted item id
- */
-async function addItem(newItem: AddItem): Promise<string> {
-  const coll = await connectCollection("items");
+const createItem: FCreateItem = async (input) => {
+  const coll = await connectCollection('items');
 
   const insertDoc = {
-    ...newItem,
+    ...input,
     createdAt: new Date(),
     updatedAt: new Date(),
-    amountStorage: newItem.amountStorage ?? 0,
-    active: newItem.active ?? false,
+    amountStorage: input.amountStorage ?? 0,
+    active: input.active ?? false,
   };
 
   const result = await coll.insertOne(insertDoc);
 
   if (!result.acknowledged) {
-    throw new Error("failed to insert item");
+    throw new Error('failed to insert item');
   }
 
   return result.insertedId.toString();
-}
+};
 
-export default addItem;
+export default createItem;

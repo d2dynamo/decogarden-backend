@@ -90,7 +90,7 @@ class Controller {
     this.next();
   }
 
-  private async checkPerm(validPermIds: string[]): Promise<void> {
+  private async checkPerm(): Promise<void> {
     try {
       const { req } = this;
       const userId = req.user?.id;
@@ -109,7 +109,25 @@ class Controller {
         throw new UserError('unauthorized', 401);
       }
 
-      if (!(await userHasPermission(userId, validPermIds))) {
+      if (!this.validPermissions) {
+        throw new Error('validPermissions not set on controller');
+      }
+
+      if (this.validPermissions.includes('self')) {
+        if (
+          userId === req.params.id ||
+          userId === req.body?.id ||
+          userId === req.query.id ||
+          userId === req.params.userId ||
+          userId === req.body?.userId ||
+          userId === req.query.userId
+        ) {
+          return;
+        }
+        this.validPermissions.slice(this.validPermissions.indexOf('self'), 1);
+      }
+
+      if (!(await userHasPermission(userId, this.validPermissions!))) {
         throw new UserError('unauthorized', 401);
       }
 
@@ -218,9 +236,10 @@ class Controller {
   public async run(): Promise<void> {
     try {
       if (this.validPermissions) {
-        await this.checkPerm(this.validPermissions);
+        await this.checkPerm();
       }
       this.logic(this);
+      this.next();
     } catch (e) {
       this.eHandler(e);
     }

@@ -1,43 +1,12 @@
 import type { ObjectId } from 'mongodb';
-import connectCollection, {
-  stringToObjectId,
-  stringToObjectIdSync,
-} from '../database/mongo';
-import getUser from '../users/get';
-import { PermissionsEnum } from '../../global/interfaces/permissions';
+import connectCollection, { stringToObjectId } from '../database/mongo';
+import { getUserBasic } from '../users';
 
-const customerObjId = stringToObjectIdSync(PermissionsEnum.customer);
-const inventoryObjId = stringToObjectIdSync(PermissionsEnum.inventory);
-const salesObjId = stringToObjectIdSync(PermissionsEnum.sales);
-const adminObjId = stringToObjectIdSync(PermissionsEnum.admin);
-
-// Returns an array of permissions that has access to the given permission
-function permissionHierarchy(permissionId: string) {
-  if (!customerObjId || !inventoryObjId || !salesObjId || !adminObjId) {
-    throw new Error('invalid permissionId, check permissions enum');
-  }
-
-  const hierarchy = {
-    [PermissionsEnum.customer]: [
-      customerObjId,
-      inventoryObjId,
-      salesObjId,
-      adminObjId,
-    ],
-    [PermissionsEnum.inventory]: [inventoryObjId, adminObjId],
-    [PermissionsEnum.sales]: [adminObjId, salesObjId],
-    [PermissionsEnum.admin]: [adminObjId],
-  };
-
-  return hierarchy[permissionId];
-}
-
-export default async function userHasPermission(
+const userHasPermission = async (
   userId: ObjectId | string,
-  validPermissionId: string[]
-) {
-  await getUser(userId);
-  console.log('checking user perms', userId, validPermissionId);
+  validPermissionIds: string[]
+) => {
+  await getUserBasic(userId);
 
   const userObjId = await stringToObjectId(userId);
 
@@ -47,8 +16,8 @@ export default async function userHasPermission(
 
   const validPermIds: ObjectId[] = [];
 
-  for (let i = 0; i < validPermissionId.length; i++) {
-    const pid = await stringToObjectId(validPermissionId[i]);
+  for (let i = 0; i < validPermissionIds.length; i++) {
+    const pid = await stringToObjectId(validPermissionIds[i]);
 
     if (!pid) {
       throw new Error('invalid permissionId');
@@ -74,4 +43,6 @@ export default async function userHasPermission(
   }
 
   return false;
-}
+};
+
+export default userHasPermission;

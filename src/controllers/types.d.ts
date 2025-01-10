@@ -23,6 +23,12 @@ interface ILocals {
   payload?: object;
 }
 
+/**
+ * Controller class options
+ * @param name - Controller name
+ * @param {PermissionsEnum} validPermissions - Permissions required to access the controller. Empty array makes admin permission.
+ * @param errorLevel - Error level
+ */
 interface IControllerOptions {
   name?: string;
   validPermissions?: string | string[];

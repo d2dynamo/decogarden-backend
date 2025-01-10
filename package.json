@@ -5,7 +5,7 @@
   "scripts": {
     "start": "bun ./src/index.ts",
     "test": "bun --env-file=./.env.test test",
-    "dev": "bun --env-file=./.env.test ./src/index.ts"
+    "dev": "bun --env-file=./.env.dev ./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

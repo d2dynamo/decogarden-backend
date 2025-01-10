@@ -24,25 +24,34 @@ bun test
 
 .env.test:
 
-JWT_PRIVATE_KEY_PATH  
-JWT_PUBLIC_KEY_PATH  
-SESSION_SECRET
+NODE_ENV
 
-MONGO_URL  
-MONGO_DB_NAME //preferably use a test db  
-MONGO_CA  
+TEST_USER_ID
+
+MONGO_URL
+MONGO_DB_NAME
+MONGO_CA
 MONGO_CERT
+
+REDIS_URL
+REDIS_PASSWORD
+REDIS_PREFIX
+
+SENDGRID_SMTP_RELAY
+SENDGRID_SMTP_PORT
+SENDGRID_SMTP_USER
+SENDGRID_API_KEY
+SENDGRID_FROM_EMAIL
 
 # TODO
 
-## Orders and shipments
+Data validator validates mongodb objectId and item.properties objects.
 
-## Finish unit tests
+Orders and shipments
 
-## Payment
+Finish unit tests
 
-## Make it good, make it fast
+Payment
 
-### Cleaner faster data validator
-
-### Custom router, replace express
+Make it good, make it fast
+Custom router, replace express

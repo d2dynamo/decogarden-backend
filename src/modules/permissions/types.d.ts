@@ -1,4 +1,4 @@
-import type { PermissionDoc, Dates } from "../../global/interfaces/database";
+import type { PermissionDoc, Dates } from '../../global/interfaces/database';
 
 export interface Permission extends Omit<PermissionDoc, Dates> {
   id: string;
@@ -6,10 +6,6 @@ export interface Permission extends Omit<PermissionDoc, Dates> {
   updatedAt: number;
 }
 
-export interface AddPermission extends Omit<PermissionDoc, Dates | "active"> {
-  active?: boolean;
-}
-
-export interface ListPermissionFilter {}
-
-export interface ListPermission extends Permission {}
+export type FListPermissions = (
+  showInactive?: boolean
+) => Promise<Permission[]>;

@@ -1,24 +1,22 @@
-import type { ObjectId } from "mongodb";
-import connectCollection, { stringToObjectId } from "../database/mongo";
-import { UserError } from "../../util/error";
-import type { UpdateItem } from "./types";
+import connectCollection, { stringToObjectId } from '../database/mongo';
+import { UserError } from '../../util/error';
+import type { FSetItem } from './types';
 
-export default async function updateItem(
-  itemId: ObjectId | string,
-  update: UpdateItem
-) {
-  const itemObjId = await stringToObjectId(itemId);
+const updateItem: FSetItem = async (input) => {
+  const itemObjId = await stringToObjectId(input.id);
 
   if (!itemObjId) {
-    throw new Error(`invalid item id: ${itemId}`);
+    throw new Error(`invalid item id: ${input.id}`);
   }
-  const coll = await connectCollection("items");
+  delete input.id;
+
+  const coll = await connectCollection('items');
 
   const result = await coll.updateOne(
     { _id: itemObjId },
     {
       $set: {
-        ...update,
+        ...input,
         updatedAt: new Date(),
       },
     }
@@ -37,4 +35,6 @@ export default async function updateItem(
   }
 
   return true;
-}
+};
+
+export default updateItem;

@@ -4,6 +4,7 @@ import type { ListUserFilter, ListUserSorts } from '../../modules/users/types';
 import type { ListOptions } from '../../global/interfaces/controller';
 import listUsers from '../../modules/users/list';
 import Controller from '../controller';
+import { PermissionsEnum } from '../../global/interfaces/permissions';
 
 async function logic(this: Controller) {
   const data = await this.validateData(this.req.query, {
@@ -42,6 +43,8 @@ async function logic(this: Controller) {
 const listUsersController = (req: Request, res: Response, next: Function) => {
   return new Controller(req, res, next, logic, {
     name: 'ListUsersController',
+    errorLevel: 2,
+    validPermissions: [PermissionsEnum.customer],
   }).run();
 };
 

@@ -4,22 +4,15 @@ import connectCollection from '../database/mongo';
 import { redisClient } from '../database/redis';
 import SgMailer from '../mailer';
 import { SendgridTemplates } from '../mailer/templates';
+import type { FCreateUser } from './types';
 
-export default async function createUser(
-  userName: string,
-  email: string,
-  password: string,
-  phone?: string
-) {
+const createUser: FCreateUser = async (input) => {
   const coll = await connectCollection('users');
 
-  const checkFilter: object[] = [{ email: email }, { userName: userName }];
-  if (phone) {
-    checkFilter.push({ phone: phone });
-  }
+  const { email, userName, password, phone } = input;
 
   const checkUsed = await coll.findOne({
-    $or: checkFilter,
+    $or: [{ email: email }, { userName: userName }],
   });
 
   if (checkUsed) {
@@ -71,5 +64,7 @@ export default async function createUser(
     verification_code: verifyToken,
   });
 
-  return result.insertedId;
-}
+  return String(result.insertedId);
+};
+
+export default createUser;

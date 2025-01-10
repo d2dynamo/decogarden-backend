@@ -32,7 +32,11 @@ async function generate2faLogic(this: Controller) {
   this.next();
 }
 
-const generate2faController = (req: Request, res: Response, next: Function) => {
+export const generate2faController = (
+  req: Request,
+  res: Response,
+  next: Function
+) => {
   return new Controller(req, res, next, generate2faLogic, {
     name: 'generate2fa',
     errorLevel: 2,
@@ -62,7 +66,11 @@ async function enable2faLogic(this: Controller) {
   this.next();
 }
 
-const enable2faController = (req: Request, res: Response, next: Function) => {
+export const enable2faController = (
+  req: Request,
+  res: Response,
+  next: Function
+) => {
   return new Controller(req, res, next, enable2faLogic, {
     name: 'enable2fa',
     errorLevel: 2,
@@ -92,11 +100,13 @@ async function verify2faLogic(this: Controller) {
   this.next();
 }
 
-const verify2faController = (req: Request, res: Response, next: Function) => {
+export const verify2faController = (
+  req: Request,
+  res: Response,
+  next: Function
+) => {
   return new Controller(req, res, next, verify2faLogic, {
     name: 'verify2fa',
     errorLevel: 2,
   }).run();
 };
-
-export { generate2faController, enable2faController, verify2faController };

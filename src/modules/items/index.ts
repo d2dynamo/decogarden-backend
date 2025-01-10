@@ -1,6 +1,6 @@
-import addItem from "./create";
-import listItems from "./list";
-import getItem from "./get";
-import updateItem from "./update";
+import addItem from './create';
+import listItems from './list';
+import { getItem, getItemBasic } from './get';
+import updateItem from './update';
 
-export { addItem, listItems, getItem, updateItem };
+export { addItem, listItems, getItem, getItemBasic, updateItem };

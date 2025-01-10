@@ -1,35 +1,29 @@
-import type { ListOptions } from "../../global/interfaces/controller";
-import connectCollection from "../database/mongo";
-import type { ListItem, ListItemFilter, ListItemSorts } from "./types";
+import type { ListOptions } from '../../global/interfaces/controller';
+import connectCollection from '../database/mongo';
+import type {
+  FListItems,
+  ListItem,
+  ListItemFilter,
+  ListItemSorts,
+} from './types';
 
-export default async function listItems(
+const listItems: FListItems = async (
   filter?: ListItemFilter,
   listOpts?: ListOptions<ListItemSorts>
-): Promise<ListItem[]> {
-  const coll = await connectCollection("items");
+) => {
+  const coll = await connectCollection('items');
 
   const query: any = {};
 
   if (filter?.title) {
-    query.title = { $regex: filter.title, $options: "i" };
+    query.title = { $regex: filter.title, $options: 'i' };
   }
   if (filter?.priceGte !== undefined) {
-    query.price = query.price || {};
-    query.price.$gte = filter.priceGte;
+    query.price = { $gte: filter.priceGte };
   }
   if (filter?.priceLte !== undefined) {
-    query.price = query.price || {};
+    query.price = query.price ?? {};
     query.price.$lte = filter.priceLte;
-  }
-
-  const sort: any = {};
-  if (listOpts?.sort) {
-    const keys = Object.keys(listOpts.sort);
-
-    for (let i = 0; i < keys.length; i++) {
-      const k = keys[i];
-      sort[k] = listOpts.sort[k];
-    }
   }
 
   const projection: any = {
@@ -45,7 +39,7 @@ export default async function listItems(
 
   const cursor = coll
     .find(query, { projection })
-    .sort(sort)
+    .sort(listOpts?.sort || { createdAt: -1 })
     .skip(skip)
     .limit(pageSize);
 
@@ -64,11 +58,13 @@ export default async function listItems(
 
     items.push({
       id: doc._id.toString(),
-      title: doc.title || "unknown item",
+      title: doc.title || 'unknown item',
       price: doc.price,
       amountStorage: doc.amountStorage || 0,
     });
   }
 
   return items;
-}
+};
+
+export default listItems;

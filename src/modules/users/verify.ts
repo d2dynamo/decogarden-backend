@@ -5,10 +5,11 @@ import connectCollection, { stringToObjectId } from '../database/mongo';
 import { redisClient } from '../database/redis';
 import SgMailer from '../mailer';
 import { SendgridTemplates } from '../mailer/templates';
-import addUserPermission from '../userPermissions/create';
+import setUserPermission from '../userPermissions/set';
+import type { FResendVerify, FVerifyUser } from './types';
 
 // TODO when twilio set up add phone nr verification
-export default async function verifyUser(token: string): Promise<boolean> {
+const verifyUser: FVerifyUser = async (token: string) => {
   const redis = await redisClient();
 
   const userId = await redis.get(`verify:${token}`);
@@ -40,7 +41,7 @@ export default async function verifyUser(token: string): Promise<boolean> {
     throw new UserError('User not found', 404);
   }
 
-  await addUserPermission({
+  await setUserPermission({
     userId: userObjId,
     permissionId: PermissionsEnum.customer,
     active: true,
@@ -49,17 +50,14 @@ export default async function verifyUser(token: string): Promise<boolean> {
   await redis.del(`verify:${token}`);
 
   return true;
-}
+};
 
-export async function resendVerify(
-  userId: string,
-  option: { email?: string; phone?: string }
-) {
-  if (!option.email && !option.phone) {
+const resendVerify: FResendVerify = async (input) => {
+  if (!input.email && !input.phone) {
     throw new UserError('Invalid option', 400);
   }
 
-  const userObjId = await stringToObjectId(userId);
+  const userObjId = await stringToObjectId(input.userId);
   if (!userObjId) {
     throw new UserError('Invalid user id', 400);
   }
@@ -72,25 +70,25 @@ export async function resendVerify(
     throw new UserError('User not found', 404);
   }
 
-  if (user.emailVerify) {
-    throw new UserError('Email already verified', 400);
-  }
-
   const redis = await redisClient();
 
   const verifyToken = genSimpleKey();
 
-  if (option.email) {
+  if (input.email) {
+    if (user.emailVerify) {
+      throw new UserError('Email already verified', 400);
+    }
+
     await redis.set(
       `verify:${verifyToken}`,
-      option.email,
+      input.email,
       'EX',
       60 * 60 * 24 * 1
     );
 
     const sgMailer = SgMailer.getInstance();
     await sgMailer.sendTemplateEmail(
-      option.email,
+      input.email,
       SendgridTemplates.verifyEmail,
       {
         verification_code: verifyToken,
@@ -98,9 +96,11 @@ export async function resendVerify(
     );
   }
 
-  if (option.phone) {
+  if (input.phone) {
     // when twilio set up add phone nr verification
   }
 
-  return true;
-}
+  return;
+};
+
+export { verifyUser, resendVerify };
