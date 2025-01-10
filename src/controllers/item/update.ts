@@ -17,7 +17,7 @@ async function logic(this: Controller) {
 
   if (!data) return;
 
-  const result = await updateItem(data.id, data);
+  const result = await updateItem(data);
 
   this.locals = {
     error: false,

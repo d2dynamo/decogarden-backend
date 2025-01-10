@@ -8,8 +8,8 @@ import Controller from '../controller';
 async function logic(this: Controller) {
   const data = await this.validateData(this.req.query, {
     title: { type: 'string' },
-    priceGte: { type: 'string' },
-    priceLte: { type: 'string' },
+    priceGte: { type: 'number' },
+    priceLte: { type: 'number' },
     page: { type: 'number' },
     pageSize: { type: 'number' },
     limit: { type: 'number' },
@@ -23,6 +23,7 @@ async function logic(this: Controller) {
     priceGte: data.priceGte,
     priceLte: data.priceLte,
   } as ListItemFilter;
+
   const listOpts = {
     page: data.page,
     pageSize: data.pageSize,
