@@ -1,5 +1,6 @@
 import type { ObjectId } from 'mongodb';
 import type { LogLevel, LogType } from '../../modules/logger/types';
+import type { CountryCode } from '../../modules/orders/types';
 
 type PaymentMethod = 'stripe' | 'paysera' | 'transfer';
 type OrderStatus =
@@ -7,6 +8,7 @@ type OrderStatus =
   | 'failedPayment'
   | 'cancelled'
   | 'delivering'
+  | 'paused'
   | 'completed';
 
 interface DefaultDoc {
@@ -30,6 +32,8 @@ export type CollectionDocs = {
   permissions: PermissionDoc;
   userPermissions: UserPermissionDoc;
   logs: LogDoc;
+  shipments: ShipmentDoc;
+  payments: PaymentDoc;
 };
 
 /** Available collections in bonkbot database */
@@ -56,15 +60,6 @@ export interface ItemDoc extends DefaultDoc {
   properties?: Record<string, any>;
   amountStorage?: number;
   active: boolean;
-}
-
-export interface OrderDoc extends DefaultDoc {
-  customerId: ObjectId;
-  itemId: ObjectId;
-  note?: string;
-  paymentMethod: PaymentMethod;
-  status: OrderStatus;
-  couponId?: ObjectId;
 }
 
 export interface CouponDoc extends DefaultDoc {
@@ -101,4 +96,32 @@ export interface UserPermissionDoc extends Omit<DefaultDoc, Dates> {
   }[];
 }
 
-export interface ShipmentDoc {}
+export interface OrderDoc extends DefaultDoc {
+  id: string;
+  customerId?: ObjectId;
+  itemId: ObjectId;
+  status: OrderStatus;
+  adress: {
+    street: string;
+    city: string;
+    country: CountryCode;
+    postalCode: string;
+  };
+  receiptEmail: string;
+  note?: string;
+  paymentMethod: PaymentMethod;
+  couponId?: ObjectId;
+}
+
+export interface ShipmentDoc {
+  id: string;
+  orderId: ObjectId;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+}
+
+export interface PaymentDoc {
+  id: string;
+  orderId: ObjectId;
+  paymentMethod: PaymentMethod;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+}
