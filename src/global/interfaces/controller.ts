@@ -8,3 +8,8 @@ export interface ListOptions<S extends SortOption> {
   limit?: number;
   sort?: S;
 }
+
+export interface Test {
+  name: string;
+  age: number;
+}
