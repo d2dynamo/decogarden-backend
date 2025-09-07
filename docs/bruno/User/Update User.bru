@@ -1,0 +1,48 @@
+meta {
+  name: Update User
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/user/update
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "id": "{{userId}}",
+    "userName": "updatedname",
+    "email": "updated@example.com",
+    "phone": "+0987654321"
+  }
+}
+
+docs {
+  # Update User
+  
+  Updates user information.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires "self" permission (own user) or admin permissions
+  
+  ## Request Body
+  - `id` (string, required): ObjectId of the user to update
+  - `userName` (string, optional): New username
+  - `email` (string, optional): New email address
+  - `phone` (string, optional): New phone number
+  
+  ## Response
+  - Success message confirming update
+  
+  ## Notes
+  - Users can only update their own data unless they have admin permissions
+  - Only provided fields will be updated
+  - Undefined fields are filtered out
+}

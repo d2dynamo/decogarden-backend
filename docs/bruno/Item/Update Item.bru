@@ -1,0 +1,56 @@
+meta {
+  name: Update Item
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/item/update
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "id": "{{itemId}}",
+    "title": "Updated Item Title",
+    "description": "Updated description",
+    "price": 39.99,
+    "properties": {
+      "color": "red",
+      "size": "large"
+    },
+    "amountStorage": 150,
+    "active": true
+  }
+}
+
+docs {
+  # Update Item
+  
+  Updates an existing item's information.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## Request Body
+  - `id` (string, required): ObjectId of the item to update
+  - `title` (string, optional): New item title
+  - `description` (string, optional): New item description
+  - `price` (number, optional): New item price
+  - `properties` (object, optional): New item properties
+  - `amountStorage` (number, optional): New storage quantity
+  - `active` (boolean, optional): Active status
+  
+  ## Response
+  - Success message confirming update
+  
+  ## Notes
+  - Only provided fields will be updated
+  - Properties object will replace existing properties entirely
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Refresh Tokens
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/auth/refreshTokens
+  body: none
+  auth: none
+}
+
+docs {
+  # Refresh Tokens
+  
+  Refreshes the user's access and refresh tokens using the existing refresh token.
+  
+  ## Request
+  - Requires "RefreshToken" cookie to be present
+  
+  ## Response
+  - New `accessToken` (string): Fresh JWT access token
+  - New `refreshToken` (string): Fresh JWT refresh token
+  
+  ## Notes
+  - Automatically reads refresh token from httpOnly cookie
+  - Returns new tokens with extended expiration
+}

@@ -1,10 +1,10 @@
 import Router from "express";
 
-import { cSetUP, cListUP } from "../controllers/userPermission";
+import { cSetUP, cGetUP } from "../controllers/userPermission";
 
 const router = Router();
 
 router.put("/set", cSetUP);
-router.get("/list/:id", cListUP);
+router.get("/:userId", cGetUP);
 
 export default router;

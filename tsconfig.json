@@ -1,25 +1,10 @@
+// This config for the compiler to include test ts files.
 {
+  "extends": "./tsconfig.base.json", //CompilerOptions here
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "allowJs": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "removeComments": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "noImplicitAny": false
+    "baseUrl": "./src",
+    "rootDir": ".",
+    "outDir": "./out/test"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "build.js", "dist", "dist/**/*"]
+  "include": ["src/**/*", "tests/**/*"]
 }

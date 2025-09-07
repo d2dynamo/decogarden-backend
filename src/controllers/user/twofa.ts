@@ -1,20 +1,16 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import {
-  generate2fa,
-  enable2fa,
-  verify2fa,
-} from '../../modules/users/authenticator';
-import Controller from '../controller';
+import { generate2fa, enable2fa, verify2fa } from "modules/users/authenticator";
+import Controller from "../controller";
 
 async function generate2faLogic(this: Controller) {
   const data = await this.validateData(this.req.body, {
     userId: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
     password: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
   });
@@ -24,12 +20,11 @@ async function generate2faLogic(this: Controller) {
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: {
       secret,
     },
   };
-  this.next();
 }
 
 export const generate2faController = (
@@ -38,19 +33,20 @@ export const generate2faController = (
   next: Function
 ) => {
   return new Controller(req, res, next, generate2faLogic, {
-    name: 'generate2fa',
+    name: "generate2fa",
     errorLevel: 2,
+    validPermissions: "self", // No permissions required
   }).run();
 };
 
 async function enable2faLogic(this: Controller) {
   const data = await this.validateData(this.req.body, {
     userId: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
     token: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
   });
@@ -60,10 +56,9 @@ async function enable2faLogic(this: Controller) {
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: {},
   };
-  this.next();
 }
 
 export const enable2faController = (
@@ -72,19 +67,20 @@ export const enable2faController = (
   next: Function
 ) => {
   return new Controller(req, res, next, enable2faLogic, {
-    name: 'enable2fa',
+    name: "enable2fa",
     errorLevel: 2,
+    validPermissions: "self",
   }).run();
 };
 
 async function verify2faLogic(this: Controller) {
   const data = await this.validateData(this.req.body, {
     userId: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
     token: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
   });
@@ -94,10 +90,9 @@ async function verify2faLogic(this: Controller) {
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: {},
   };
-  this.next();
 }
 
 export const verify2faController = (
@@ -106,7 +101,7 @@ export const verify2faController = (
   next: Function
 ) => {
   return new Controller(req, res, next, verify2faLogic, {
-    name: 'verify2fa',
+    name: "verify2fa",
     errorLevel: 2,
   }).run();
 };

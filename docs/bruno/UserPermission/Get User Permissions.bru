@@ -1,0 +1,36 @@
+meta {
+  name: Get User Permissions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/userPermission/{{userId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Get User Permissions
+  
+  Retrieves the permissions assigned to a specific user.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires "self" permission (own permissions) or admin permissions
+  
+  ## URL Parameters
+  - `userId` (string, required): ObjectId of the user whose permissions to retrieve
+  
+  ## Response
+  - User permissions object with assigned permissions and metadata
+  
+  ## Notes
+  - Users can only view their own permissions unless they have admin access
+  - Returns permissions with activation status and timestamps
+  - Uses user permission projection
+}

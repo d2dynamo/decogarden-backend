@@ -1,0 +1,53 @@
+meta {
+  name: List Items
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/item/list
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "page": 1,
+    "pageSize": 20,
+    "title": "sample",
+    "active": true,
+    "sort": {
+      "createdAt": 1
+    }
+  }
+}
+
+docs {
+  # List Items
+  
+  Retrieves a paginated list of items with optional filtering.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## Request Body
+  - `page` (number, optional): Page number for pagination
+  - `pageSize` (number, optional): Number of items per page
+  - `title` (string, optional): Filter by item title
+  - `active` (boolean, optional): Filter by active status
+  - `sort` (object, optional): Sort criteria
+  
+  ## Response
+  - Array of items with list projection
+  - Pagination metadata
+  
+  ## Notes
+  - Uses POST method to support complex filtering
+  - Returns items with basic projection (no description/properties)
+  - Supports pagination and sorting
+}

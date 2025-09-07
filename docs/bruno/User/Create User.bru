@@ -1,0 +1,45 @@
+meta {
+  name: Create User
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/user/create
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "userName": "newuser",
+    "email": "newuser@example.com",
+    "phone": "+1234567890"
+  }
+}
+
+docs {
+  # Create User
+  
+  Creates a new user in the system.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## Request Body
+  - `userName` (string, optional): User's display name
+  - `email` (string, optional): User's email address
+  - `phone` (string, optional): User's phone number
+  
+  ## Response
+  - Success message with created user details
+  
+  ## Notes
+  - All fields are optional and validated if provided
+  - User will need to verify email if provided
+}

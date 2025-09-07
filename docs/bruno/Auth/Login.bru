@@ -1,0 +1,37 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: object{{baseUrl}}/auth/local
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "dev@decogarden.lt",
+    "password": "your_password"
+  }
+}
+
+docs {
+  # Login User
+  
+  Authenticates a user with email and password using Passport Local Strategy.
+  
+  ## Request Body
+  - `email` (string, required): User's email address
+  - `password` (string, required): User's password
+  
+  ## Response
+  - `accessToken` (string): JWT access token for API authentication
+  - `refreshToken` (string): JWT refresh token set as httpOnly cookie
+  
+  ## Notes
+  - Sets a secure httpOnly cookie named "RefreshToken"
+  - Access token expires in 30 minutes
+  - Refresh token expires in 1 day
+}

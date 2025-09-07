@@ -1,34 +1,32 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import { getUser, getUserBasic } from '../../modules/users';
-import Controller from '../controller';
-import { PermissionsEnum } from '../../global/interfaces/permissions';
+import Controller from "../controller";
+import userLayer from "modules/database/user";
+import { PermissionsEnum } from "global/const";
 
 async function getUserLogic(this: Controller) {
   const data = await this.validateData(this.req.params, {
-    id: { type: 'string', options: { required: true } },
+    id: { type: "string", options: { required: true } },
   });
 
   if (!this.req.user.id || this.req.user.id !== data.id) {
     this.locals = {
       error: true,
       code: 401,
-      message: 'Unauthorized',
+      message: "Unauthorized",
       payload: {},
     };
-    this.next();
     return;
   }
 
-  const result = await getUser(data);
+  const result = await userLayer.get(data.id);
 
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: { user: result },
   };
-  this.next();
 }
 
 export const getUserController = (
@@ -37,25 +35,26 @@ export const getUserController = (
   next: Function
 ) => {
   return new Controller(req, res, next, getUserLogic, {
-    name: 'GetUserController',
+    name: "GetUserController",
     validPermissions: PermissionsEnum.sales,
   }).run();
 };
 
 async function getUserBasicLogic(this: Controller) {
   const data = await this.validateData(this.req.params, {
-    id: { type: 'string', options: { required: true } },
+    id: { type: "objectId", options: { required: true } },
   });
 
-  const result = await getUserBasic(data);
+  const result = await userLayer.get(data.id, {
+    projection: { userName: 1, email: 1 },
+  });
 
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: { user: result },
   };
-  this.next();
 }
 
 export const getUserBasicController = (
@@ -64,7 +63,7 @@ export const getUserBasicController = (
   next: Function
 ) => {
   return new Controller(req, res, next, getUserBasicLogic, {
-    name: 'GetUserBasicController',
+    name: "GetUserBasicController",
     validPermissions: PermissionsEnum.customer,
   }).run();
 };

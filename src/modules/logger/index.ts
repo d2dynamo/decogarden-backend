@@ -1,15 +1,15 @@
 // env.CONSOLE_LOG contains a string telling the api what to log in console using numbers.
-// example string: "INFO:0;WARN:6;ERROR:9" = will not log INFO, will log WARN up to level 6 and ERROR up to level 9.
+// example string: "INFO:0;WARN:6;ERROR:9" = will not log INFO, will log WARN up to level 6 and ERROR up to level 9. 0-9.
 
-import type { LogLevel, LogType, LogData } from './types';
-import connectCollection from '../database/mongo';
+import type { LogLevel, LogType, LogData } from "./types";
+import connectCollection from "modules/database/mongo";
 
 function consoleLog(t: LogType, l: LogLevel, m: string, d: LogData) {
-  const consoleLog = process.env.CONSOLE_LOG || '';
-  const logLevels = consoleLog.split(';');
+  const consoleLog = process.env.CONSOLE_LOG || "";
+  const logLevels = consoleLog.split(";");
   const logLevel = logLevels.find((logLevel) => logLevel.includes(t));
   if (logLevel) {
-    const [logType, logLevelValue] = logLevel.split(':');
+    const [logType, logLevelValue] = logLevel.split(":");
     if (l <= parseInt(logLevelValue)) {
       console[logType.toLowerCase()](m);
       if (Object.keys(d).length) console.log(d);
@@ -17,7 +17,7 @@ function consoleLog(t: LogType, l: LogLevel, m: string, d: LogData) {
   }
 }
 async function mongoLog(t: LogType, l: LogLevel, m: string, d: LogData) {
-  const coll = await connectCollection('logs');
+  const coll = await connectCollection("logs");
   coll.insertOne({
     type: t,
     level: l,
@@ -33,8 +33,8 @@ function info(
   data: LogData,
   logMongo = true
 ) {
-  consoleLog('INFO', level, message, data);
-  if (logMongo) mongoLog('INFO', level, message, data);
+  consoleLog("INFO", level, message, data);
+  if (logMongo) mongoLog("INFO", level, message, data);
 }
 
 function warn(
@@ -43,8 +43,8 @@ function warn(
   data: LogData,
   logMongo = true
 ) {
-  consoleLog('WARN', level, message, data);
-  if (logMongo) mongoLog('WARN', level, message, data);
+  consoleLog("WARN", level, message, data);
+  if (logMongo) mongoLog("WARN", level, message, data);
 }
 
 function error(
@@ -62,8 +62,8 @@ function error(
       },
     };
   }
-  consoleLog('ERROR', level, message, data);
-  if (logMongo) mongoLog('ERROR', level, message, data);
+  consoleLog("ERROR", level, message, data);
+  if (logMongo) mongoLog("ERROR", level, message, data);
 }
 
 export default { info, warn, error };

@@ -1,0 +1,35 @@
+meta {
+  name: Get Item Basic
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/item/{{itemId}}/basic
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Get Item Basic
+  
+  Retrieves basic information about a specific item.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## URL Parameters
+  - `itemId` (string, required): ObjectId of the item to retrieve
+  
+  ## Response
+  - Item object with basic information (list projection)
+  
+  ## Notes
+  - Returns limited item data (title, price, storage amount, active status)
+  - More lightweight than full item endpoint
+}

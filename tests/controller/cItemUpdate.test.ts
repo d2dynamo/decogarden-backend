@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, mock } from "bun:test";
-import { Request, Response } from "express";
-import { updateItemController } from "../src/controllers/item";
-import addItem from "../src/modules/items/create";
+import type { Request, Response } from "express";
+import { updateItemController } from "controllers/item";
+import addItem from "modules/items/create";
 
 const validItem = {
   title: "Item Title",
@@ -50,12 +50,6 @@ describe("updateItemController", async () => {
     req = { body: {} };
     res = {
       locals: {},
-      status: function () {
-        return this;
-      },
-      send: function () {
-        return this;
-      },
     };
     next = mock(() => {});
 

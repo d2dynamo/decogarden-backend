@@ -1,0 +1,35 @@
+meta {
+  name: Get Item
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/item/{{itemId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Get Item
+  
+  Retrieves detailed information about a specific item.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## URL Parameters
+  - `itemId` (string, required): ObjectId of the item to retrieve
+  
+  ## Response
+  - Item object with full details including description and properties
+  
+  ## Notes
+  - Returns complete item information
+  - Uses full item projection
+}

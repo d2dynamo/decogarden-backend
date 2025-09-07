@@ -1,0 +1,33 @@
+meta {
+  name: List Permissions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/permission/
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # List Permissions
+  
+  Retrieves a list of all available permissions in the system.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## Response
+  - Array of available permissions
+  
+  ## Notes
+  - Returns all system permissions
+  - Used for permission management interfaces
+  - Helps in understanding available permission levels
+}

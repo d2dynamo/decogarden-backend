@@ -1,11 +1,12 @@
-import createUserController from './create';
-import { getUserController, getUserBasicController } from './get';
-import listUsersController from './list';
+import createUserController from "./create";
+import { getUserController, getUserBasicController } from "./get";
+import listUsersController from "./list";
 import {
   generate2faController,
   enable2faController,
   verify2faController,
-} from './twofa';
+} from "./twofa";
+import { updateUserController, archiveUserController } from "./set";
 
 export {
   createUserController,
@@ -15,4 +16,6 @@ export {
   generate2faController,
   enable2faController,
   verify2faController,
+  updateUserController,
+  archiveUserController,
 };

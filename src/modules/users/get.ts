@@ -1,7 +1,8 @@
-import type { ObjectId } from 'mongodb';
-import connectCollection, { stringToObjectId } from '../database/mongo';
-import { UserError } from '../../util/error';
-import type { FGetUser, FGetUserBasic } from './types';
+import type { ObjectId } from "mongodb";
+import connectCollection, { stringToObjectId } from "../database/mongo";
+import { UserError } from "../../util/error";
+import type { FGetUser, FGetUserBasic } from "./types";
+import { userLayer } from "modules/database";
 
 const getUser: FGetUser = async (input) => {
   const filter: { _id?: ObjectId; email?: string } = {};
@@ -17,14 +18,12 @@ const getUser: FGetUser = async (input) => {
     filter.email = input.email;
   }
   if (!filter._id && !filter.email) {
-    throw new Error('missing userId or email');
+    throw new Error("missing userId or email");
   }
 
-  const coll = await connectCollection('users');
+  const coll = await connectCollection("users");
 
-  const result = await coll.findOne(filter, {
-    projection: { hash: 0, authSecret: 0 },
-  });
+  const result = await userLayer.findOne(filter);
 
   if (!result || !result._id) {
     throw new UserError(`User does not exist`, 404);
@@ -37,7 +36,7 @@ const getUser: FGetUser = async (input) => {
     emailVerify: result.emailVerify,
     phone: result.phone || undefined,
     phoneVerify:
-      typeof result.phoneVerify === 'boolean' ? result.phoneVerify : undefined,
+      typeof result.phoneVerify === "boolean" ? result.phoneVerify : undefined,
     lastLogin: result.lastLogin?.getTime() || undefined,
     lastLoginAttempt: result.lastLoginAttempt?.getTime() || undefined,
     createdAt: result.createdAt.getTime(),
@@ -51,9 +50,7 @@ const getUserBasic: FGetUserBasic = async (id) => {
     throw new Error(`invalid userId: ${id}`);
   }
 
-  const coll = await connectCollection('users');
-
-  const result = await coll.findOne(
+  const result = await userLayer.findOne(
     { _id: uoid, archivedAt: { $exists: false } },
     { projection: { _id: 0, userName: 1, email: 1 } }
   );

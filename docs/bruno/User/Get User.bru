@@ -1,0 +1,35 @@
+meta {
+  name: Get User
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/user/{{userId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Get User
+  
+  Retrieves detailed information about a specific user.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires "self" permission (own user) or admin permissions
+  
+  ## URL Parameters
+  - `userId` (string, required): ObjectId of the user to retrieve
+  
+  ## Response
+  - User object with full details (excluding sensitive fields like password hash)
+  
+  ## Notes
+  - Users can only access their own data unless they have admin permissions
+  - Returns user data with secure projection (no password/auth secrets)
+}

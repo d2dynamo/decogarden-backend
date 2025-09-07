@@ -1,0 +1,55 @@
+meta {
+  name: Set User Permissions
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/userPermission/set
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "userId": "{{userId}}",
+    "permissions": [
+      {
+        "id": "sales",
+        "active": true
+      },
+      {
+        "id": "inventory",
+        "active": false
+      }
+    ]
+  }
+}
+
+docs {
+  # Set User Permissions
+  
+  Sets or updates permissions for a specific user.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires admin permissions
+  
+  ## Request Body
+  - `userId` (string, required): ObjectId of the user to update permissions for
+  - `permissions` (array, required): Array of permission objects
+    - `id` (string, required): Permission identifier
+    - `active` (boolean, required): Whether the permission is active
+  
+  ## Response
+  - Success message confirming permission update
+  
+  ## Notes
+  - Only admins can modify user permissions
+  - Completely replaces existing permissions for the user
+  - Each permission has an active/inactive state
+}

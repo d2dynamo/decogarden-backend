@@ -1,4 +1,4 @@
 import cSetUP from "./create";
-import cListUP from "./list";
+import cGetUP from "./get";
 
-export { cSetUP, cListUP };
+export { cSetUP, cGetUP };

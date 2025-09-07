@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
-import { Request, Response } from "express";
-import { getItemController } from "../src/controllers/item";
-import addItem from "../src/modules/items/create";
+import type { Request, Response } from "express";
+import { getItemController } from "controllers/item";
+import addItem from "modules/items/create";
 
 let validItemId = "";
 
@@ -39,12 +39,6 @@ describe("getItemController", async () => {
     req = { params: {} };
     res = {
       locals: {},
-      status: function () {
-        return this;
-      },
-      send: function () {
-        return this;
-      },
     };
     next = mock(() => {});
 

@@ -24,6 +24,7 @@ export default async function connectCollection<T extends DekoCollections>(
     return client.db(dbn).collection<CollectionDocs[T]>(collName);
   }
 
+  // force connection just in case the singleton doesnt work for some reason
   let conn = await mongoClient();
   return conn.db(dbn).collection<CollectionDocs[T]>(collName);
 }

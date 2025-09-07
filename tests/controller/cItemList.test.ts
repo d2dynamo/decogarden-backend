@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
-import { Request, Response } from "express";
-import { listItemsController } from "../src/controllers/item";
-import addItem from "../src/modules/items/create";
+import type { Request, Response } from "express";
+import { listItemsController } from "controllers/item";
+import addItem from "modules/items/create";
 
 const validAllBody = {
   page: 1,
@@ -59,9 +59,6 @@ describe("listItemController", async () => {
     req = { body: {} };
     res = {
       locals: {},
-      send: function () {
-        return this;
-      },
     };
     next = mock(() => {});
 

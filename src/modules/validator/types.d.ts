@@ -1,3 +1,5 @@
+import type { ObjectId } from "mongodb";
+
 type ErrorsDesc = { [key: string]: string | object };
 
 interface ValidateOptions {
@@ -18,7 +20,7 @@ interface ArrayValidateOpts extends ValidateOptions {
   minLength?: number = 1;
   maxLength?: number = 1000;
   /** TODO: Limit array to only contain this type. Default: "any" */
-  contains?: ExpectType | 'any';
+  contains?: ExpectType | "any";
 }
 
 interface ObjectValidateOpts extends ValidateOptions {
@@ -33,6 +35,8 @@ interface PhoneNumberValidateOpts extends ValidateOptions {
 interface SortValidateOpts extends ObjectValidateOpts {}
 
 interface EmailValidateOpts extends ValidateOptions {}
+
+interface ObjectIdValidateOpts extends ValidateOptions {}
 
 interface Sort extends Object {
   [key: string]: 1 | -1;
@@ -51,24 +55,27 @@ type ValidatorTypes = {
   phoneNumber: string;
   sort: Sort;
   email: string;
+  objectId: ObjectId;
 };
 
 type ExpectType = keyof ValidatorTypes;
 
-type ValidatorOptions<ET extends ExpectType> = ET extends 'number'
+type ValidatorOptions<ET extends ExpectType> = ET extends "number"
   ? NumberValidateOpts
-  : ET extends 'string'
+  : ET extends "string"
   ? StringValidateOpts
-  : ET extends 'array'
+  : ET extends "array"
   ? ArrayValidateOpts
-  : ET extends 'object'
+  : ET extends "object"
   ? ObjectValidateOpts
-  : ET extends 'phoneNumber'
+  : ET extends "phoneNumber"
   ? PhoneNumberValidateOpts
-  : ET extends 'email'
+  : ET extends "email"
   ? EmailValidateOpts
-  : ET extends 'sort'
+  : ET extends "sort"
   ? SortValidateOpts
+  : ET extends "objectId"
+  ? ObjectIdValidateOpts
   : ValidateOptions;
 
 type Validation = {
@@ -86,6 +93,7 @@ export {
   PhoneNumberValidateOpts,
   SortValidateOpts,
   EmailValidateOpts,
+  ObjectIdValidateOpts,
   Sort,
   PhoneNumber,
   Email,

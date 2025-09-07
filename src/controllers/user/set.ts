@@ -1,22 +1,27 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import Controller from '../controller';
-import { PermissionsEnum } from '../../global/interfaces/permissions';
-import { archiveUser } from '../../modules/users';
+import Controller from "../controller";
+import { PermissionsEnum } from "global/const";
+import { archiveUser } from "modules/users";
+import { userLayer } from "modules/database";
 
 async function updateUserLogic(this: Controller) {
-  const data = await this.validateData(this.req.body, {
-    id: { type: 'string', options: { required: true } },
-    userName: { type: 'string' },
-    email: { type: 'string' },
-    phone: { type: 'string' },
+  const paramData = await this.validateData(this.req.params, {
+    id: { type: "string", options: { required: true } },
   });
+
+  const data = await this.validateData(this.req.body, {
+    userName: { type: "string" },
+    email: { type: "string" },
+    phone: { type: "string" },
+  });
+
+  await userLayer.update(paramData.id, data);
 
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
-    payload: {},
+    message: "success",
   };
 }
 
@@ -26,14 +31,15 @@ export const updateUserController = (
   next: Function
 ) => {
   return new Controller(req, res, next, updateUserLogic, {
-    name: 'updateUserController',
+    name: "updateUserController",
     errorLevel: 2,
+    validPermissions: [PermissionsEnum.self], // Admin always has access per default
   }).run();
 };
 
 async function archiveUserLogic(this: Controller) {
   const data = await this.validateData(this.req.params, {
-    id: { type: 'string', options: { required: true } },
+    id: { type: "string", options: { required: true } },
   });
 
   const result = await archiveUser(data.id);
@@ -45,8 +51,7 @@ async function archiveUserLogic(this: Controller) {
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
-    payload: {},
+    message: "success",
   };
 }
 
@@ -56,7 +61,7 @@ export const archiveUserController = (
   next: Function
 ) => {
   return new Controller(req, res, next, archiveUserLogic, {
-    name: 'archiveUserController',
+    name: "archiveUserController",
     errorLevel: 2,
     validPermissions: PermissionsEnum.admin,
   }).run();

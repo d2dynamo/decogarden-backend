@@ -1,0 +1,35 @@
+meta {
+  name: Verify User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/verify
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "token": "verification_token",
+    "code": "123456"
+  }
+}
+
+docs {
+  # Verify User
+  
+  Verifies a user's email or enables 2FA using a verification token and code.
+  
+  ## Request Body
+  - `token` (string, required): Verification token received via email
+  - `code` (string, required): 6-digit verification code
+  
+  ## Response
+  - Success message confirming verification
+  
+  ## Notes
+  - Used for email verification and 2FA setup
+  - Token expires after a certain time period
+}

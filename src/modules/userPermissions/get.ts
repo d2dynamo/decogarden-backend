@@ -1,17 +1,16 @@
-import type { ObjectId } from 'mongodb';
-import connectCollection, { stringToObjectId } from '../database/mongo';
-import { getUserBasic } from '../users';
+import type { ObjectId } from "mongodb";
+
+import { stringToObjectId } from "../database/mongo";
+import { permissionLayer } from "modules/database";
 
 const userHasPermission = async (
   userId: ObjectId | string,
   validPermissionIds: string[]
 ) => {
-  await getUserBasic(userId);
-
   const userObjId = await stringToObjectId(userId);
 
   if (!userObjId) {
-    throw new Error('invalid userId');
+    throw new Error("invalid userId");
   }
 
   const validPermIds: ObjectId[] = [];
@@ -20,15 +19,13 @@ const userHasPermission = async (
     const pid = await stringToObjectId(validPermissionIds[i]);
 
     if (!pid) {
-      throw new Error('invalid permissionId');
+      throw new Error("invalid permissionId");
     }
 
     validPermIds.push(pid);
   }
 
-  const coll = await connectCollection('userPermissions');
-
-  const result = await coll.findOne({
+  const result = await permissionLayer.findOne({
     userId: userObjId,
     permissions: {
       $elemMatch: {

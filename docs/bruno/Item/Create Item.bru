@@ -1,0 +1,52 @@
+meta {
+  name: Create Item
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/item/create
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "title": "Sample Item",
+    "description": "A sample item description",
+    "price": 29.99,
+    "properties": {
+      "color": "blue",
+      "size": "medium"
+    },
+    "amountStorage": 100
+  }
+}
+
+docs {
+  # Create Item
+  
+  Creates a new item in the inventory system.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires appropriate permissions
+  
+  ## Request Body
+  - `title` (string, optional): Item title/name
+  - `description` (string, optional): Item description
+  - `price` (number, optional): Item price
+  - `properties` (object, optional): Custom item properties
+  - `amountStorage` (number, optional): Quantity in storage
+  
+  ## Response
+  - Success message with created item details
+  
+  ## Notes
+  - All fields are optional and validated if provided
+  - Properties can contain custom key-value pairs
+}

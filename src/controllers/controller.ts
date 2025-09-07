@@ -1,16 +1,21 @@
-import DataValidator from '../modules/validator';
-import type { Request, Response } from 'express';
+import DataValidator from "../modules/validator";
+import type { Request, Response } from "express";
 import type {
   ExpectType,
   ValidatorTypes,
   ValidatorOptions,
-} from '../modules/validator/types';
-import type { ControllerState, IControllerOptions, ILocals } from './types';
-import userHasPermission from '../modules/userPermissions/get';
-import logger from '../modules/logger';
-import { UserError } from '../util/error';
-import type { LogLevel } from '../modules/logger/types';
-import { PermissionsEnum } from '../global/interfaces/permissions';
+} from "../modules/validator/types";
+import type { ControllerState, IControllerOptions, ILocals } from "./types";
+import userHasPermission from "../modules/userPermissions/get";
+import logger from "../modules/logger";
+import { UserError } from "../util/error";
+import type { LogLevel } from "../modules/logger/types";
+import {
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  PAGINATION_MAX_PAGE_SIZE,
+  PermissionsEnum,
+} from "global/const";
+import { createPagination, type Pagination } from "util/pagination";
 
 class Controller {
   req: Request;
@@ -36,19 +41,21 @@ class Controller {
     this._next = next;
     this.logic = logic.bind(this);
 
-    this.name = options?.name || 'unknown';
+    this.name = options?.name || "unknown";
     this.errorLevel = options?.errorLevel || 2;
 
     if (options?.validPermissions) {
-      Array.isArray(options.validPermissions)
-        ? (this.validPermissions = [
-            ...options.validPermissions,
-            PermissionsEnum.admin,
-          ])
-        : (this.validPermissions = [
-            options.validPermissions,
-            PermissionsEnum.admin,
-          ]);
+      if (Array.isArray(options.validPermissions)) {
+        this.validPermissions = [
+          ...options.validPermissions,
+          PermissionsEnum.admin,
+        ];
+      } else {
+        this.validPermissions = [
+          options.validPermissions,
+          PermissionsEnum.admin,
+        ];
+      }
     }
 
     this.state = {
@@ -58,7 +65,7 @@ class Controller {
     this.locals = {
       error: true,
       code: 500,
-      message: 'internal server error',
+      message: "internal server error",
     };
   }
 
@@ -69,14 +76,14 @@ class Controller {
       this.locals = {
         error: true,
         code: err.code || 400,
-        message: err.message || 'unknown client error',
+        message: err.message || "unknown client error",
       };
       this.next();
       return;
     }
 
     logger.error(this.errorLevel, `Controller ${this.name}`, {
-      userId: req.user?.id || 'unknown',
+      userId: req.user?.id || "unknown",
       error: err,
       headers: req.headers,
       body: req.body,
@@ -85,7 +92,7 @@ class Controller {
     this.locals = {
       error: true,
       code: 500,
-      message: 'internal server error',
+      message: "internal server error",
     };
     this.next();
   }
@@ -96,45 +103,73 @@ class Controller {
       const userId = req.user?.id;
 
       if (!userId) {
-        logger.warn(
-          2,
-          `Controller ${this.name}: Request missing user or userId`,
-          {
-            userId: req.user?.id || 'unknown',
-            headers: req.headers,
-            body: req.body,
-          }
-        );
+        logger.warn(2, `Controller ${this.name}: Request missing user`, {
+          userId: req.user?.id || "unknown",
+          headers: req.headers,
+          body: req.body,
+        });
 
-        throw new UserError('unauthorized', 401);
+        throw new UserError("unauthorized", 401);
       }
 
       if (!this.validPermissions) {
-        throw new Error('validPermissions not set on controller');
+        throw new Error("validPermissions not set on controller");
       }
 
-      if (this.validPermissions.includes('self')) {
-        if (
-          userId === req.params.id ||
-          userId === req.body?.id ||
-          userId === req.query.id ||
-          userId === req.params.userId ||
-          userId === req.body?.userId ||
-          userId === req.query.userId
-        ) {
+      const selfIdx = this.validPermissions.indexOf("self");
+      if (selfIdx !== -1) {
+        const selfCheckFields = [
+          req.params.id,
+          req.params.userId,
+          req.body?.id,
+          req.body?.userId,
+          req.query.id,
+          req.query.userId,
+        ];
+
+        if (selfCheckFields.some((field) => field === userId)) {
           return;
         }
-        this.validPermissions.slice(this.validPermissions.indexOf('self'), 1);
+        this.validPermissions.splice(selfIdx, 1);
       }
 
       if (!(await userHasPermission(userId, this.validPermissions!))) {
-        throw new UserError('unauthorized', 401);
+        throw new UserError("unauthorized", 401);
       }
 
       return;
     } catch (e) {
       this.eHandler(e);
     }
+  }
+
+  public getPagination(): Pagination {
+    let page = 1;
+    let pageSize = PAGINATION_DEFAULT_PAGE_SIZE as number;
+
+    if (this.req.query.page !== undefined) {
+      page = Number(this.req.query.page);
+      if (!page || isNaN(page) || page < 1) {
+        this.state.dataErrors.page = "page must be a positive integer";
+        page = 1;
+      }
+    }
+
+    if (this.req.query.pageSize !== undefined) {
+      pageSize = Number(this.req.query.pageSize);
+      if (!pageSize || isNaN(pageSize) || pageSize < 1) {
+        this.state.dataErrors.pageSize = "pageSize must be a positive integer";
+        pageSize = PAGINATION_DEFAULT_PAGE_SIZE as number;
+      }
+    }
+
+    const validPage = Math.max(1, page);
+    const validPageSize = Math.min(
+      Math.max(1, pageSize),
+      PAGINATION_MAX_PAGE_SIZE
+    );
+
+    return createPagination(validPage, validPageSize);
   }
 
   public async validateData<
@@ -145,29 +180,24 @@ class Controller {
     from: Record<string, any>,
     expect: E
   ): Promise<{
-    [K in keyof E]: ValidatorTypes[E[K]['type']];
+    [K in keyof E]: E[K]["options"] extends { required: true }
+      ? ValidatorTypes[E[K]["type"]]
+      : ValidatorTypes[E[K]["type"]] | undefined;
   }> {
     const dv = new DataValidator(this.state);
     const validData: Partial<{
-      [K in keyof E]: ValidatorTypes[E[K]['type']];
+      [K in keyof E]: E[K]["options"] extends { required: true }
+        ? ValidatorTypes[E[K]["type"]]
+        : ValidatorTypes[E[K]["type"]] | undefined;
     }> = {};
 
-    const eKeys = Object.keys(expect) as (keyof E)[];
+    for (const [key, config] of Object.entries(expect)) {
+      const { type, options } = config;
 
-    for (let i = 0; i < eKeys.length; i++) {
-      const key = eKeys[i];
-      const { type, options } = expect[key];
-
-      const result = await dv.check(
-        from[key as string],
-        key as string,
-        type,
-        options
-      );
+      const result = await dv.check(from[key], key, type, options);
 
       if (result !== false) {
-        validData[key] = result;
-        continue;
+        (validData as any)[key] = result;
       }
     }
 
@@ -176,7 +206,9 @@ class Controller {
     }
 
     return validData as {
-      [K in keyof E]: ValidatorTypes[E[K]['type']];
+      [K in keyof E]: E[K]["options"] extends { required: true }
+        ? ValidatorTypes[E[K]["type"]]
+        : ValidatorTypes[E[K]["type"]] | undefined;
     };
   }
 
@@ -219,11 +251,8 @@ class Controller {
   // }
 
   public next(): void {
-    if (Object.keys(this.state.dataErrors).length > 0) {
-      if (!this.locals.payload) {
-        this.locals.payload = {};
-      }
-
+    const errorCount = Object.keys(this.state.dataErrors).length;
+    if (errorCount > 0) {
       this.locals.payload = {
         ...this.locals.payload,
         errors: this.state.dataErrors,
@@ -238,7 +267,7 @@ class Controller {
       if (this.validPermissions) {
         await this.checkPerm();
       }
-      this.logic(this);
+      await this.logic(this);
       this.next();
     } catch (e) {
       this.eHandler(e);

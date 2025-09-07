@@ -1,27 +1,27 @@
-import type { ObjectId } from 'mongodb';
-import type { LogLevel, LogType } from '../../modules/logger/types';
+import type { ObjectId } from "mongodb";
+import type { LogLevel, LogType } from "../../modules/logger/types";
 
-type PaymentMethod = 'stripe' | 'paysera' | 'transfer';
+type PaymentMethod = "stripe" | "paysera" | "transfer";
 type OrderStatus =
-  | 'awaitingPayment'
-  | 'failedPayment'
-  | 'cancelled'
-  | 'delivering'
-  | 'completed';
+  | "awaitingPayment"
+  | "failedPayment"
+  | "cancelled"
+  | "delivering"
+  | "completed";
 
 interface DefaultDoc {
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type Dates = 'createdAt' | 'updatedAt';
+export type Dates = "createdAt" | "updatedAt";
 
 /**
  *  NOTE: All docs have a _id.
  * We do not include it here cause its simpler to insert docs that way. mongo driver inserts _id as optional existing type in fetch functions.
  */
 
-/** Collection document standard defs */
+/** Collection defs */
 export type CollectionDocs = {
   users: UserDoc;
   items: ItemDoc;
@@ -32,7 +32,7 @@ export type CollectionDocs = {
   logs: LogDoc;
 };
 
-/** Available collections in bonkbot database */
+/** Available collections in database */
 export type DekoCollections = keyof CollectionDocs;
 
 export interface UserDoc extends DefaultDoc {
@@ -80,6 +80,7 @@ export interface CouponDoc extends DefaultDoc {
 export interface LogDoc {
   type: LogType;
   level: LogLevel;
+  /** User that caused the log, if applicable*/
   userId?: ObjectId;
   message: string;
   data: { [key: string]: any };

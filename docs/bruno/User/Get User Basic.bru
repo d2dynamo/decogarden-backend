@@ -1,0 +1,34 @@
+meta {
+  name: Get User Basic
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/user/{{userId}}/basic
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Get User Basic
+  
+  Retrieves basic public information about a specific user.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  
+  ## URL Parameters
+  - `userId` (string, required): ObjectId of the user to retrieve
+  
+  ## Response
+  - User object with basic public information only
+  
+  ## Notes
+  - Returns limited user data (public projection)
+  - More restrictive than full user endpoint
+}

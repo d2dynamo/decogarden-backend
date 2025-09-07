@@ -1,7 +1,4 @@
-import type {
-  Dates,
-  UserPermissionDoc,
-} from '../../global/interfaces/database';
+import type { ObjectId } from "mongodb";
 
 export interface UserPermission {
   id: string;
@@ -23,7 +20,3 @@ export interface SetUserPermission {
 }
 
 export type FSetUserPermission = (input: SetUserPermission) => Promise<boolean>;
-
-export type FListUserPermissions = (
-  o?: ListOptions<ListUserPermissionSorts>
-) => Promise<UserPermission[]>;

@@ -1,0 +1,42 @@
+meta {
+  name: Archive User
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/user/archive
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "id": "{{userId}}"
+  }
+}
+
+docs {
+  # Archive User
+  
+  Archives (soft deletes) a user account.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires admin permissions
+  
+  ## Request Body
+  - `id` (string, required): ObjectId of the user to archive
+  
+  ## Response
+  - Success message confirming archival
+  
+  ## Notes
+  - Only admins can archive users
+  - This is a soft delete operation
+  - Archived users cannot log in but data is preserved
+}

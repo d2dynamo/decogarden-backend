@@ -1,14 +1,14 @@
-import type {
-  ListOptions,
-  SortOption,
-} from '../../global/interfaces/controller';
-import { Dates } from '../../global/interfaces/database';
-import { UserDoc } from '../../global/interfaces/database';
+import type { ObjectId } from "mongodb";
+import type { SortOptions } from "../../global/interfaces/controller";
+import type { Dates } from "../../global/interfaces/database";
+import type { UserDoc } from "../../global/interfaces/database";
+import type { Pagination } from "util/pagination";
+import type { UserSorts } from "modules/database/types";
 
 export interface User
   extends Omit<
     UserDoc,
-    Dates | 'lastLogin' | 'lastLoginAttempt' | 'hash' | 'authSecret'
+    Dates | "lastLogin" | "lastLoginAttempt" | "hash" | "authSecret"
   > {
   id: string;
   lastLogin?: number;
@@ -24,7 +24,7 @@ export type FCreateUser = (user: {
   password: string;
   userName: string;
   phone?: string;
-}) => Promise<User['id']>;
+}) => Promise<User["id"]>;
 
 export type FVerifyUser = (token: string) => Promise<boolean>;
 
@@ -41,12 +41,17 @@ export type FGetUser = (input: {
 
 export type FGetUserBasic = (
   id: ObjectId | string
-) => Promise<Pick<User, 'userName' | 'email'>>;
+) => Promise<Pick<User, "userName" | "email">>;
+
+export type ListUserOptions = {
+  pagination: Pagination;
+  sort?: UserSorts;
+};
 
 export type FListUsers = (
-  f?: ListUserFilter,
-  o?: ListOptions<ListUserSorts>
-) => Promise<Pick<User, 'id' | 'userName' | 'email'>[]>;
+  f: ListUserFilter,
+  o: ListUserOptions
+) => Promise<Pick<User, "id" | "userName" | "email">[]>;
 
 export type FSetUser = (user: SetUser) => Promise<boolean>;
 
@@ -76,11 +81,4 @@ export interface ListUserFilter {
   userName?: string;
   email?: string;
   mustBeVerified?: boolean;
-}
-
-export interface ListUserSorts extends SortOption {
-  userName: 1 | -1;
-  email: 1 | -1;
-  createdAt: 1 | -1;
-  updatedAt: 1 | -1;
 }

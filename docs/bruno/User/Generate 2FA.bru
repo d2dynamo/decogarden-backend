@@ -1,0 +1,42 @@
+meta {
+  name: Generate 2FA
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/user/gen2fa
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "userId": "{{userId}}"
+  }
+}
+
+docs {
+  # Generate 2FA
+  
+  Generates a new 2FA secret and QR code for a user.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires "self" permission (own user) or admin permissions
+  
+  ## Request Body
+  - `userId` (string, required): ObjectId of the user
+  
+  ## Response
+  - 2FA secret and QR code for authenticator app setup
+  
+  ## Notes
+  - Generates new TOTP secret
+  - Returns QR code for easy setup with authenticator apps
+  - 2FA must be enabled separately after generation
+}

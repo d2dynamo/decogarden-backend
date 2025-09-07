@@ -1,26 +1,23 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import { PermissionsEnum } from '../../global/interfaces/permissions';
-import setUserPermission from '../../modules/userPermissions/set';
-
-import Controller from '../controller';
+import { PermissionsEnum } from "global/const";
+import Controller from "../controller";
+import setUserPermission from "../../modules/userPermissions/set";
 
 async function logic(this: Controller) {
   const data = await this.validateData(this.req.body, {
-    userId: { type: 'string', options: { required: true } },
-    permissionId: { type: 'string', options: { required: true } },
-    active: { type: 'boolean' },
+    userId: { type: "string", options: { required: true } },
+    permissionId: { type: "string", options: { required: true } },
+    active: { type: "boolean" },
   });
 
-  const result = await setUserPermission(data);
+  await setUserPermission(data);
 
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
-    payload: { id: result },
+    message: "success",
   };
-  this.next();
 }
 
 const setUserPermissionController = (
@@ -29,7 +26,7 @@ const setUserPermissionController = (
   next: Function
 ) => {
   return new Controller(req, res, next, logic, {
-    name: 'SetUserPermissionController',
+    name: "SetUserPermissionController",
     validPermissions: PermissionsEnum.admin,
   }).run();
 };

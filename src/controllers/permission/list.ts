@@ -1,19 +1,18 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import { listPermissions } from '../../modules/permissions';
-import { PermissionsEnum } from '../../global/interfaces/permissions';
-import Controller from '../controller';
+import Controller from "../controller";
+import { PermissionsEnum } from "global/const";
+import { permissionLayer } from "modules/database";
 
 async function logic(this: Controller) {
-  const permissions = await listPermissions();
+  const permissions = await permissionLayer.listAvailable();
 
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: { permissions },
   };
-  this.next();
 }
 
 const listPermissionsController = (
@@ -22,7 +21,7 @@ const listPermissionsController = (
   next: Function
 ) => {
   return new Controller(req, res, next, logic, {
-    name: 'ListPermissionsController',
+    name: "ListPermissionsController",
     validPermissions: PermissionsEnum.admin,
   }).run();
 };

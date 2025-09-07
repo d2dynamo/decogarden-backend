@@ -1,0 +1,32 @@
+meta {
+  name: Hello
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/hello/
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  # Hello Endpoint
+  
+  Simple health check and greeting endpoint.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  
+  ## Response
+  - Simple greeting message
+  
+  ## Notes
+  - Used for testing API connectivity
+  - Verifies authentication is working
+  - Basic endpoint for development/testing
+}

@@ -6,7 +6,6 @@ const localStrategy = new LocalStrategy(
   async (email, password, done) => {
     try {
       const coll = await connectCollection("users");
-
       const userDoc = await coll.findOneAndUpdate(
         { email: email.toLocaleLowerCase() },
         {
@@ -44,11 +43,10 @@ const localStrategy = new LocalStrategy(
         { email: email },
         { $set: { lastLogin: new Date() } }
       );
-
       return done(null, { id: userDoc._id, email: email });
     } catch (err) {
       console.log(err);
-      return done({ code: 500, message: "internal server error" });
+      return done(err);
     }
   }
 );

@@ -1,15 +1,16 @@
-import type { ControllerState } from '../../controllers/types';
-import type { ExpectType, ValidatorTypes, ValidatorOptions } from './types';
-import numberValidator from './number';
-import stringValidator from './string';
-import arrayValidator from './array';
-import booleanValidator from './boolean';
-import objectValidator from './object';
-import sortValidator from './sort';
-import emailValidator from './email';
-import { ErrorMessage } from './util';
-import { DataValidationError } from '../../util/error';
-import phoneNumberValidator from './phoneNumber';
+import type { ControllerState } from "controllers/types";
+import type { ExpectType, ValidatorTypes, ValidatorOptions } from "./types";
+import numberValidator from "./number";
+import stringValidator from "./string";
+import arrayValidator from "./array";
+import booleanValidator from "./boolean";
+import objectValidator from "./object";
+import sortValidator from "./sort";
+import emailValidator from "./email";
+import { ErrorMessage } from "./util";
+import { DataValidationError } from "util/error";
+import phoneNumberValidator from "./phoneNumber";
+import objectIdValidator from "./objectId";
 
 /**
  * @param {ControllerState} ctrlState - ControllerState to store errors.
@@ -23,9 +24,11 @@ import phoneNumberValidator from './phoneNumber';
  */
 class DataValidator {
   public ctrlState: ControllerState;
+  private showNoInputError: boolean;
 
-  constructor(ctrlState: ControllerState) {
+  constructor(ctrlState: ControllerState, showNoInputError = false) {
     this.ctrlState = ctrlState;
+    this.showNoInputError = showNoInputError;
   }
 
   async check<ET extends ExpectType>(
@@ -35,11 +38,11 @@ class DataValidator {
     options?: ValidatorOptions<ET>
   ): Promise<ValidatorTypes[ET] | false> {
     if (val === null || val === undefined) {
-      this.ctrlState.dataErrors[fieldName] = ErrorMessage.noInput;
-
       if (options?.required) {
         this.ctrlState.dataErrors[fieldName] = ErrorMessage.missingRequired;
         this.ctrlState.failMsg = ErrorMessage.missingRequired;
+      } else if (this.showNoInputError) {
+        this.ctrlState.dataErrors[fieldName] = ErrorMessage.noInput;
       }
 
       return false;
@@ -49,25 +52,25 @@ class DataValidator {
 
     try {
       switch (expect) {
-        case 'number':
+        case "number":
           result = numberValidator(val, options) as ValidatorTypes[ET];
           break;
-        case 'string':
+        case "string":
           result = stringValidator(val, options) as ValidatorTypes[ET];
           break;
-        case 'array':
+        case "array":
           result = arrayValidator(val, options) as ValidatorTypes[ET];
           break;
-        case 'boolean':
+        case "boolean":
           result = booleanValidator(val) as ValidatorTypes[ET];
           break;
-        case 'object':
+        case "object":
           result = objectValidator(val, options) as ValidatorTypes[ET];
           break;
-        case 'phoneNumber':
+        case "phoneNumber":
           result = phoneNumberValidator(val, options) as ValidatorTypes[ET];
           break;
-        case 'sort':
+        case "sort":
           const sortResult = sortValidator(val, options);
 
           if (sortResult.errors) {
@@ -81,8 +84,12 @@ class DataValidator {
           result = sortResult.validSort as ValidatorTypes[ET];
           break;
 
-        case 'email':
+        case "email":
           result = emailValidator(val, options) as ValidatorTypes[ET];
+          break;
+
+        case "objectId":
+          result = objectIdValidator(val, options) as ValidatorTypes[ET];
           break;
 
         default:
@@ -94,6 +101,7 @@ class DataValidator {
       if (err instanceof DataValidationError) {
         this.ctrlState.dataErrors[fieldName] = err.message;
         if (options?.required) {
+          // Only set failMsg if required field
           this.ctrlState.failMsg = err.message;
         }
         return false;

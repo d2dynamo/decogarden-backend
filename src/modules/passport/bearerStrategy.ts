@@ -1,23 +1,24 @@
-import { Strategy } from 'passport-http-bearer';
-import { validateToken } from '../token';
-import type { ITokenUser } from '../../global/interfaces/token';
+import { Strategy } from "passport-http-bearer";
+
+import { validateToken } from "../token";
+import type { ITokenUser } from "global/interfaces/token";
 
 const bearerStrategy = new Strategy(
   { passReqToCallback: true },
   async (req, token: string, done: Function) => {
-    if (!token) return done(Error('Missing token'), null);
+    if (!token) return done(Error("Missing token"), null);
 
     try {
-      const validateResult = await validateToken(token, 'access_token');
+      const validateResult = await validateToken(token, "access_token");
 
       if (!validateResult.verified) {
-        return done({ code: 406, message: 'invalid token.' }, false);
+        return done({ code: 406, message: "invalid token." }, false);
       }
 
       const payload = validateResult.jwt.payload;
 
       if (!payload.sub || !payload.sub_email) {
-        return done({ code: 406, message: 'token missing user' });
+        return done({ code: 406, message: "token missing user" });
       }
 
       const user: ITokenUser = {
@@ -31,7 +32,7 @@ const bearerStrategy = new Strategy(
     } catch (err) {
       console.log(err);
 
-      return done({ code: 500, message: 'internal server error' });
+      return done({ code: 500, message: "internal server error" });
     }
   }
 );

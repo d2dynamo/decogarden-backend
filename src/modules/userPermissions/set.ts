@@ -1,6 +1,7 @@
-import connectCollection, { stringToObjectId } from '../database/mongo';
-import type { FSetUserPermission, SetUserPermission } from './types';
-import { getUserBasic } from '../users';
+import { stringToObjectId } from "../database/mongo";
+import type { FSetUserPermission, SetUserPermission } from "./types";
+import { getUserBasic } from "../users";
+import { permissionLayer } from "modules/database";
 
 /** Use this as both create and update. */
 const setUserPermission: FSetUserPermission = async (
@@ -9,20 +10,15 @@ const setUserPermission: FSetUserPermission = async (
   await getUserBasic(input.userId);
 
   const permObjId = await stringToObjectId(input.permissionId);
-  const userObjId = await stringToObjectId(input.userId);
 
-  if (!permObjId || !userObjId) {
-    throw new Error('invalid id');
+  if (!permObjId) {
+    throw new Error("invalid permissionId");
   }
-
-  const coll = await connectCollection('userPermissions');
-
-  const filter = { userId: userObjId };
 
   const update = {
     $set: {
-      'permissions.$[permission].active': input.active ?? true,
-      'permissions.$[permission].updatedAt': new Date(),
+      "permissions.$[permission].active": input.active ?? true,
+      "permissions.$[permission].updatedAt": new Date(),
     },
 
     $push: {
@@ -30,7 +26,7 @@ const setUserPermission: FSetUserPermission = async (
         $each: [
           {
             id: permObjId,
-            active: typeof input.active === 'boolean' ? input.active : true,
+            active: typeof input.active === "boolean" ? input.active : true,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -40,12 +36,12 @@ const setUserPermission: FSetUserPermission = async (
     },
   };
 
-  const options = { arrayFilters: [{ 'permission.id': permObjId }] };
+  const options = { arrayFilters: [{ "permission.id": permObjId }] };
 
-  const result = await coll.updateOne(filter, update, options);
+  const result = await permissionLayer.update(input.userId, update, options);
 
   if (result.matchedCount && !result.upsertedCount && !result.modifiedCount) {
-    throw new Error('failed to create permission');
+    throw new Error("failed to create permission");
   }
 
   return true;

@@ -1,0 +1,44 @@
+meta {
+  name: Enable 2FA
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/user/enable2fa
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "userId": "{{userId}}",
+    "code": "123456"
+  }
+}
+
+docs {
+  # Enable 2FA
+  
+  Enables 2FA for a user by verifying a TOTP code.
+  
+  ## Authentication
+  - Requires valid Bearer token
+  - Requires "self" permission (own user) or admin permissions
+  
+  ## Request Body
+  - `userId` (string, required): ObjectId of the user
+  - `code` (string, required): 6-digit TOTP code from authenticator app
+  
+  ## Response
+  - Success message confirming 2FA activation
+  
+  ## Notes
+  - Requires prior 2FA secret generation
+  - Verifies TOTP code before enabling
+  - Once enabled, 2FA will be required for login
+}

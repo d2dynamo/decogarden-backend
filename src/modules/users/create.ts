@@ -1,26 +1,27 @@
-import { UserError } from '../../util/error';
-import genSimpleKey from '../../util/simpleToken';
-import connectCollection from '../database/mongo';
-import { redisClient } from '../database/redis';
-import SgMailer from '../mailer';
-import { SendgridTemplates } from '../mailer/templates';
-import type { FCreateUser } from './types';
+import { UserError } from "util/error";
+import genSimpleKey from "util/simpleToken";
+import { redisClient } from "../database/redis";
+import userLayer from "../database/user";
+import SgMailer from "../mailer";
+import { SendgridTemplates } from "../mailer/templates";
+import type { FCreateUser } from "./types";
 
 const createUser: FCreateUser = async (input) => {
-  const coll = await connectCollection('users');
-
   const { email, userName, password, phone } = input;
 
-  const checkUsed = await coll.findOne({
-    $or: [{ email: email }, { userName: userName }],
+  //userLayer.create checks for duplicates internally but i dont want to create a hash before even checking for duplicate-
+  //so we check for duplicate here.
+  const checkUsed = await userLayer.list({
+    userName,
+    email,
   });
 
-  if (checkUsed) {
+  if (checkUsed.length) {
     throw new UserError(`email or username already used`, 409);
   }
 
   const hash = await Bun.password.hash(password, {
-    algorithm: 'argon2id',
+    algorithm: "argon2id",
     timeCost: 3,
     memoryCost: 65536,
   });
@@ -36,16 +37,16 @@ const createUser: FCreateUser = async (input) => {
   };
 
   if (phone) {
-    set['phone'] = phone;
-    set['phoneVerified'] = false;
+    set["phone"] = phone;
+    set["phoneVerified"] = false;
 
     // when twilio set up add phone nr verification
   }
 
-  const result = await coll.insertOne(set);
+  const result = await userLayer.create(set);
 
   if (!result.insertedId) {
-    throw new Error('failed to create user');
+    throw new Error("failed to create user");
   }
 
   const redis = await redisClient();
@@ -55,7 +56,7 @@ const createUser: FCreateUser = async (input) => {
   await redis.set(
     `verify:${verifyToken}`,
     String(result.insertedId),
-    'EX',
+    "EX",
     60 * 60 * 24 * 1
   );
 

@@ -1,0 +1,9 @@
+// This file for building.
+{
+  "extends": "./tsconfig.base.json", //CompilerOptions here
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./build"
+  },
+  "include": ["src/**/*"]
+}

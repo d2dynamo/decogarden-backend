@@ -1,12 +1,12 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
-import verifyUser from '../../modules/users/verify';
-import Controller from '../controller';
+import Controller from "../controller";
+import { verifyUser } from "modules/users/verify";
 
 async function verifyUserLogic(this: Controller) {
   const data = await this.validateData(this.req.body, {
     code: {
-      type: 'string',
+      type: "string",
       options: { required: true },
     },
   });
@@ -16,15 +16,14 @@ async function verifyUserLogic(this: Controller) {
   this.locals = {
     error: false,
     code: 200,
-    message: 'success',
+    message: "success",
     payload: {},
   };
-  this.next();
 }
 
 const verifyUserController = (req: Request, res: Response, next: Function) => {
   return new Controller(req, res, next, verifyUserLogic, {
-    name: 'verifyUser',
+    name: "verifyUser",
     errorLevel: 2,
   }).run();
 };
